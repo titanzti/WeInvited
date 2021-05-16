@@ -52,7 +52,7 @@ class _DetailScreenState extends State<DetailScreen>
               ? () {
                   PostNotifier postsNotifier =
                       Provider.of<PostNotifier>(context, listen: false);
-                  getPosts1(postsNotifier, _title);
+                  getPostswithcategory(postsNotifier, _title);
                   print('เชื่อมต่อ');
 
                   UserDataProfileNotifier profileNotifier =
@@ -114,7 +114,7 @@ class _DetailScreenState extends State<DetailScreen>
       ),
       body: RefreshIndicator(
         onRefresh: () => () async {
-          await getPosts1(postsNotifier, _title);
+          await getPostswithcategory(postsNotifier, _title);
           // await getProfile(profileNotifier);
           // await getEvenReqPosts(joinNotifier,myuid);
         }(),
@@ -276,7 +276,7 @@ class _DetailScreenState extends State<DetailScreen>
                                                   //   ),
                                                   // ),
                                                   Text(
-                                                    posts[index].category ?? "",
+                                                    posts[index].name ?? "",
                                                     textAlign: TextAlign.left,
                                                     style: TextStyle(
                                                       fontWeight:

@@ -64,10 +64,7 @@ class _categoryListState extends State<categoryList> {
                     onTap: () {
                       Navigator.pop(context);
                     },
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Color(0xff61688B),
-                    ),
+                    child: Icon(Icons.arrow_back_ios, color: Colors.black),
                   ),
                   SizedBox(
                     height: 40,

@@ -29,27 +29,27 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    PostNotifier postNotifier = Provider.of<PostNotifier>(context);
+    // PostNotifier postNotifier = Provider.of<PostNotifier>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          signOutGoogleV1();
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     signOutGoogleV1();
 
-          // Navigator.pushAndRemoveUntil(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (BuildContext context) => Otherprofile()),
-          //     (Route<dynamic> route) => false);
-        },
-        child: Icon(Icons.add),
-        foregroundColor: Colors.white,
-      ),
+      //     // Navigator.pushAndRemoveUntil(
+      //     //     context,
+      //     //     MaterialPageRoute(
+      //     //         builder: (BuildContext context) => Otherprofile()),
+      //     //     (Route<dynamic> route) => false);
+      //   },
+      //   child: Icon(Icons.add),
+      //   foregroundColor: Colors.white,
+      // ),
       appBar: primaryAppBar(
         null,
         Text(
-          "Explorer",
+          "Category",
           textAlign: TextAlign.left,
           style: TextStyle(
             fontWeight: FontWeight.bold,

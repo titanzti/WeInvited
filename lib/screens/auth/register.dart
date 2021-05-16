@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:we_invited/notifier/userData_notifier.dart';
 import 'package:we_invited/screens/auth/interest.dart';
+import 'package:we_invited/services/auth_service.dart';
 import 'package:we_invited/services/login.dart';
 import 'package:we_invited/services/user_management.dart';
 import 'package:we_invited/utils/colors.dart';
@@ -253,6 +255,22 @@ class _RegisterState extends State<Register> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
+                              SignInButton(
+                                Buttons.Google,
+                                text: "Sign up with Google",
+                                onPressed: () async {
+                                  signupWithGoogle().then((result) {
+                                    if (result != null) {
+                                      Navigator.of(context).pushReplacement(
+                                        CupertinoPageRoute(
+                                          builder: (_) => InterestScreen(),
+                                        ),
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 20.0),
                               Container(
                                 padding: const EdgeInsets.only(bottom: 5.0),
                                 child: Text(

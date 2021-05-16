@@ -30,6 +30,8 @@ class _IntroScreenState extends State<IntroScreen> {
                   child: Image.asset(
                     "assets/create.png",
                     height: 200,
+                    width: 300,
+                    fit: (BoxFit.fill),
                   ),
                 ),
                 SizedBox(height: 30.0),

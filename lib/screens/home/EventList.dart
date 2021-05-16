@@ -53,7 +53,7 @@ class _PostListViewState extends State<PostListView> {
   var otheremail;
   var arr = [];
   bool liked = false;
-  int totallike;
+  static int totallike;
   int mylikes;
   var mypostid;
 
@@ -63,10 +63,12 @@ class _PostListViewState extends State<PostListView> {
   Animation<double> opacity;
 
 /*ฟังชั่นกดไลท์ */
-  Future likepost(int mylike, String postId) async {
+  Future likepost(int totallike, String postId) async {
     final uEmail = await AuthService().getCurrentEmail();
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
@@ -74,23 +76,29 @@ class _PostListViewState extends State<PostListView> {
 
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .update({'likes': totallike + 1});
 
     return FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
-        .update({'likes': 1});
+        .set({'likes': 1});
   }
 
 /*ฟังชั่นกดอันไลท์ */
-  Future unlikepost(int mylike, String postId) async {
+  Future unlikepost(int totallike, String postId) async {
     final uEmail = await AuthService().getCurrentEmail();
 
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
@@ -98,6 +106,8 @@ class _PostListViewState extends State<PostListView> {
 
     return await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .update({'likes': totallike - 1});
   }
@@ -111,6 +121,8 @@ class _PostListViewState extends State<PostListView> {
     /*ดึงค่าไลท์จากcollection/Posts/collection/likes */
     FirebaseFirestore.instance
         .collection("Posts")
+        .doc('ALL')
+        .collection('PostsList')
         .doc(postid)
         .collection('likes')
         .doc(uEmail)
@@ -128,16 +140,18 @@ class _PostListViewState extends State<PostListView> {
     /*ดึงค่าไลท์จากcollection/Posts/likes */
     FirebaseFirestore.instance
         .collection("Posts")
+        .doc('ALL')
+        .collection("PostsList")
         .where('postid', isEqualTo: postid)
         .get()
         .then((querySnapshot) {
       //print(querySnapshot);
-      int totallike;
+      // int totallike;
       totallike = querySnapshot.docs.length;
-      print('totallike$totallike');
+      // print('totallike$totallike');
 
       querySnapshot.docs.forEach((value) {
-        print('testlike=>>>>>>${value.get('likes')}');
+        // print('testlike=>>>>>>${value.get('likes')}');
       });
     }).catchError((onError) {
       print("getCloudFirestoreUsers: ERROR");
@@ -182,6 +196,7 @@ class _PostListViewState extends State<PostListView> {
                   getCloudFirestore();
                   otheremail = posts.emailuser;
                   mypostid = posts.postid;
+                  getlikes(mypostid);
 
                   // CartNotifier cartNotifier =
                   // Provider.of<CartNotifier>(context, listen: false);
@@ -349,8 +364,6 @@ class _PostListViewState extends State<PostListView> {
     // print(otheremail);
     // print('posts.emailuser.toString()${posts.emailuser.toString()}');
 
-    getlikes(mypostid);
-
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 16),
       child: InkWell(
@@ -503,12 +516,14 @@ class _PostListViewState extends State<PostListView> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: <Widget>[
-                                        Text(
-                                          posts.name ?? "",
-                                          textAlign: TextAlign.left,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 18,
+                                        Expanded(
+                                          child: Text(
+                                            posts.name,
+                                            textAlign: TextAlign.left,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 18,
+                                            ),
                                           ),
                                         ),
                                         Container(
@@ -533,13 +548,16 @@ class _PostListViewState extends State<PostListView> {
                                     Icon(Icons.location_on,
                                         size: 16,
                                         color: Theme.of(context).primaryColor),
-                                    Text(
-                                      posts.place.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 14,
+                                    Container(
+                                      child: Text(
+                                        posts.place,
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 18,
+                                        ),
                                       ),
                                     ),
-
                                     Padding(
                                       padding: const EdgeInsets.only(top: 4),
                                       child: Row(
@@ -706,13 +724,13 @@ class _PostListViewState extends State<PostListView> {
                           ? () {
                               setState(() {
                                 liked = false;
-                                unlikepost(mylikes, posts.postid);
+                                unlikepost(totallike, posts.postid);
                               });
                             }
                           : () {
                               setState(() {
                                 liked = true;
-                                likepost(mylikes, posts.postid);
+                                likepost(totallike, posts.postid);
                               });
                             },
                       icon: liked

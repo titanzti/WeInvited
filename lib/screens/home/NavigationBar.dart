@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:we_invited/screens/Notification/Notifica.dart';
 import 'package:we_invited/screens/category/categoryPage.dart';
 import 'package:we_invited/screens/profile/profile.dart';
@@ -22,6 +23,8 @@ class _HomeState extends State<Home> {
   ];
 
   void onTabTapped(int index) {
+    HapticFeedback.lightImpact();
+
     setState(() {
       _currentIndex = index;
     });

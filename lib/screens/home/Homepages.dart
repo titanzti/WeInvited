@@ -16,13 +16,22 @@ import 'package:we_invited/models/post.dart';
 import 'package:we_invited/models/user.dart';
 import 'package:we_invited/notifier/bannerAd_notifier.dart';
 import 'package:we_invited/notifier/join_notifier.dart';
+import 'package:we_invited/notifier/postRecom_notifier.dart';
+import 'package:we_invited/notifier/postRecom1_notifier.dart';
+import 'package:we_invited/notifier/postRecom2_notifier.dart';
+import 'package:we_invited/shared/text_style.dart';
+import 'package:we_invited/widgets/ui_helper.dart';
+
 import 'package:we_invited/notifier/post_notifier.dart';
 import 'package:we_invited/notifier/userData_notifier.dart';
-import 'package:we_invited/screens/Notification/Notifica.dart';
-import 'package:we_invited/screens/auth/interest.dart';
+
 import 'package:we_invited/screens/create_event/Post_activity.dart';
+import 'package:we_invited/screens/home/EvenLiesRecom.dart';
+import 'package:we_invited/screens/home/EvenLiesRecom1.dart';
 import 'package:we_invited/screens/home/EventList.dart';
-import 'package:we_invited/shared/text_style.dart';
+import 'package:we_invited/screens/home/EvenLiesRecom2.dart';
+import 'package:we_invited/screens/home/EvenLiesRecom3.dart';
+import 'package:we_invited/screens/home/EvenLiesRecom4.dart';
 import 'package:we_invited/screens/home/EventDetail.dart';
 import 'package:we_invited/services/Posts_service.dart';
 import 'package:we_invited/services/auth_service.dart';
@@ -33,8 +42,6 @@ import 'package:we_invited/utils/app_utils.dart';
 import 'package:we_invited/utils/colors.dart';
 import 'package:we_invited/utils/internetConnectivity.dart';
 import 'package:we_invited/widgets/allWidgets.dart';
-import 'package:we_invited/widgets/ui_helper.dart';
-import 'package:expandable_text/expandable_text.dart';
 
 class HomeFeed extends StatefulWidget {
   final JoinEvent joinEvent;
@@ -76,18 +83,110 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
   Future getPopPostsFuture;
 
   Future getOtherPostsFuture;
-
+  Future getPostsRecom1Future;
+  Future getPostsRecom2Future;
+  Future getPostsRecom3Future;
+  Future getPostsRecom4Future;
   Future getProfileFuture;
   Future getEvenReqFuture;
   Future getBannerAdsFuture;
+  Future getPostsRecomFuture;
   List<String> formValue;
 
+//  static int totalcategoryFood;
+// static int totalcategoryHealth;
+// static int totalcategoryGames;
+// static int totalcategoryBusiness;
+// static int totalcategoryEducation;
+// static int totalcategoryParty;
+
+// static int totalcategoryNature;
+// static int totalcategoryOther;
+// static int totalcategoryShopping;
+// static int totalcategorySport;
+
+  List value;
+  static var interest1;
+  static var interest2;
+  static var interest3;
+  static var interest4;
+  static var interest5;
+
+  Color color2;
   _HomeState(this.joinEvent, this.postDetails);
 
+  Color _colorFromHex(String hexColor) {
+    final hexCode = hexColor.replaceAll('#', '');
+    return Color(int.parse('FF$hexCode', radix: 16));
+  }
+
+  testListinterest() async {
+    print('testListinterest');
+    final uEmail = await AuthService().getCurrentEmail();
+
+    FirebaseFirestore.instance
+        .collection("userData")
+        .doc(uEmail)
+        .collection('profile')
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((element) {
+        value = element.data()["Listinterest"];
+        print(value);
+
+        interest1 = value[0];
+        interest2 = value[1];
+        interest3 = value[2];
+        interest4 = value[3];
+        interest5 = value[4];
+//          print('test1==>>$interest1');
+
+//         print('value=>>>$value');
+//         print('Listinterest1${value[0]}');
+//                 print('Listinterest1${value[1]}');
+//  print('Listinterest1${value[2]}');
+
+//   print('Listinterest1${value[3]}');
+//    print('Listinterest1${value[4]}');
+
+        // FirebaseFirestore.instance.collection("items").doc(value[0]).get().then((value){
+        //   print(value.data);
+        // });
+      });
+    });
+  }
+
+// static  Future setinterest() async {
+//     print("getinterest");
+//     final uEmail = await AuthService().getCurrentEmail();
+//     FirebaseFirestore.instance
+//         .collection("interest")
+//         .doc(uEmail)
+//         .collection('like')
+//         // .where('Party', isEqualTo: 'Party')
+//         .get()
+//         .then((querySnapshot) {
+//       querySnapshot.docs.forEach((value) {
+//          totalcategoryBusiness = value.get('Business');
+//          totalcategoryEducation = value.get('Education');
+//          totalcategoryFood = value.get('Food');
+//          totalcategoryGames = value.get('Games');
+//          totalcategoryParty = value.get('Party');
+
+//          totalcategoryHealth = value.get('Health');
+//          totalcategoryNature = value.get('Nature');
+//          totalcategoryOther = value.get('Other');
+//          totalcategoryShopping = value.get('Shopping');
+//          totalcategorySport = value.get('Sport');
+
+//       });
+//     }).catchError((onError) {
+//       print(onError);
+//     });
+//   }
   @override
   void initState() {
     print("initStateHome");
-
     scrollController = ScrollController();
     controller =
         AnimationController(vsync: this, duration: Duration(seconds: 1))
@@ -107,6 +206,17 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
           value == true
               ? () {
                   initFirebaseMessaging();
+                  // setinterest();
+//                   print('totalcategoryFood=>>>>>$totalcategoryFood');
+//                                     print('totalcategoryHealth=>>>>>$totalcategoryHealth');
+//                                     totalcategoryFood>totalcategoryHealth?print('มากกว่า'):print('ไม่เข้าiftotalcategoryFood');
+
+// print('totalcategoryGames$totalcategoryGames');
+// print('totalcategoryBusiness$totalcategoryBusiness');
+// print('totalcategoryEducation$totalcategoryEducation');
+
+                  color2 = _colorFromHex("#cf9cff");
+
                   // getCurrentUser();
                   // updateToken();
 
@@ -123,6 +233,31 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                   PostNotifier postsNotifier =
                       Provider.of<PostNotifier>(context, listen: false);
                   getPostsFuture = getPosts(postsNotifier);
+
+                  PostRrcomNotifier postsrecomNotifier =
+                      Provider.of<PostRrcomNotifier>(context, listen: false);
+                  getPostsRecomFuture =
+                      getPostsRecom(postsrecomNotifier, interest1);
+
+                  PostRrcomNotifier1 postsrecom1Notifier =
+                      Provider.of<PostRrcomNotifier1>(context, listen: false);
+                  getPostsRecom1Future =
+                      getPostsRecom1(postsrecom1Notifier, interest2);
+
+                  PostRrcomNotifier2 postsrecom2Notifier =
+                      Provider.of<PostRrcomNotifier2>(context, listen: false);
+                  getPostsRecom2Future =
+                      getPostsRecom2(postsrecom2Notifier, interest3);
+
+                  PostRrcomNotifier3 postsrecom3Notifier =
+                      Provider.of<PostRrcomNotifier3>(context, listen: false);
+                  getPostsRecom3Future =
+                      getPostsRecom3(postsrecom3Notifier, interest4);
+
+                  PostRrcomNotifier4 postsrecom4Notifier =
+                      Provider.of<PostRrcomNotifier4>(context, listen: false);
+                  getPostsRecom4Future =
+                      getPostsRecom4(postsrecom4Notifier, interest5);
 
                   PostNotifier postsPopNotifier =
                       Provider.of<PostNotifier>(context, listen: false);
@@ -231,14 +366,14 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
 
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    resultsLoaded = getUsersPastTripsStreamSnapshots();
+    resultsLoaded = getUsersPastEventStreamSnapshots();
 
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    resultsLoaded = getUsersPastTripsStreamSnapshots();
+    resultsLoaded = getUsersPastEventStreamSnapshots();
 
     super.didChangeDependencies();
   }
@@ -269,10 +404,12 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
     if (!mounted) return progressIndicator(MColors.primaryPurple);
   }
 
-  getUsersPastTripsStreamSnapshots() async {
+  getUsersPastEventStreamSnapshots() async {
     print("getUsersPastTripsStreamSnapshots");
     var data = await FirebaseFirestore.instance
         .collection("Posts")
+        .doc('ALL')
+        .collection("PostsList")
         // .where("name", isLessThanOrEqualTo: _searchController)
         .get();
     if (this.mounted) {
@@ -319,12 +456,34 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     print("buildHome");
+    testListinterest();
 
     _height = MediaQuery.of(context).size.height;
     _width = MediaQuery.of(context).size.width;
 
     final PostNotifier postsNotifier = Provider.of<PostNotifier>(context);
     var posts = postsNotifier.postList;
+
+    final PostRrcomNotifier postsrecomNotifier =
+        Provider.of<PostRrcomNotifier>(context);
+    var postsrecom = postsrecomNotifier.postrecomList;
+
+    final PostRrcomNotifier1 postsrecom1Notifier =
+        Provider.of<PostRrcomNotifier1>(context);
+    var postsrecom1 = postsrecom1Notifier.postrecomList1;
+
+    final PostRrcomNotifier2 postsrecom2Notifier =
+        Provider.of<PostRrcomNotifier2>(context);
+    var postsrecom2 = postsrecom2Notifier.postrecomList2;
+
+    final PostRrcomNotifier3 postsrecom3Notifier =
+        Provider.of<PostRrcomNotifier3>(context);
+    var postsrecom3 = postsrecom3Notifier.postrecomList3;
+
+    final PostRrcomNotifier4 postsrecom4Notifier =
+        Provider.of<PostRrcomNotifier4>(context);
+    var postsrecom4 = postsrecom4Notifier.postrecomList4;
+
     themeData = Theme.of(context);
 
     final PostNotifier postsPopNotifier = Provider.of<PostNotifier>(context);
@@ -351,6 +510,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
     final format1 = DateFormat("MMM");
     final format2 = new DateFormat(' h:mm');
     final format3 = new DateFormat(' h:mm ');
+
     // print();
     return FutureBuilder(
       future: Future.wait([
@@ -359,8 +519,17 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
         getEvenReqFuture,
         getBannerAdsFuture,
         getPopPostsFuture,
+        getPostsRecomFuture,
+        getPostsRecom1Future,
+        getPostsRecom2Future,
+        getPostsRecom3Future,
+        getPostsRecom4Future
       ]),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        if (!snapshot.hasData) {
+          return progressIndicator(MColors.primaryPurple);
+        }
+
         return SafeArea(
           child: Scaffold(
             floatingActionButton: FloatingActionButton(
@@ -394,10 +563,11 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                 // );
               },
               child: Icon(Icons.add),
+              backgroundColor: Colors.purple[900],
               foregroundColor: Colors.white,
             ),
             key: _scaffoldKey,
-            // backgroundColor: Colors.black,
+            backgroundColor: color2,
             body: RefreshIndicator(
               onRefresh: () => () async {
                 await getPosts(postsNotifier);
@@ -405,6 +575,11 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                 await getEvenReqPosts(joinNotifier);
                 await getBannerAds(bannerAdNotifier);
                 await getPostsPop(postsPopNotifier);
+                await getPostsRecom(postsrecomNotifier, interest1);
+                await getPostsRecom1(postsrecom1Notifier, interest2);
+                await getPostsRecom2(postsrecom2Notifier, interest3);
+                await getPostsRecom3(postsrecom3Notifier, interest4);
+                await getPostsRecom4(postsrecom4Notifier, interest5);
               }(),
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -493,23 +668,40 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                               //   ),
                               // ),
 
+                              // Container(
+                              //   padding: const EdgeInsets.all(10.0),
+                              //   decoration: BoxDecoration(
+                              //     borderRadius:
+                              //         BorderRadius.all(Radius.circular(8)),
+                              //   ),
+                              //   child: InkWell(
+                              //     onTap: () async {
+                              //       bottom_sheet(context, formValue);
+                              //     },
+                              //     child: Icon(
+                              //       MdiIcons.settingsHelper,
+                              //       size: 18,
+                              //       color: Colors.grey,
+                              //     ),
+                              //   ),
+                              // ),
                               Container(
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
+                                margin: const EdgeInsets.only(left: 16.0),
+                                child: ClipRRect(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
-                                ),
-                                child: InkWell(
-                                  onTap: () async {
-                                    bottom_sheet(context, formValue);
-                                  },
-                                  child: Icon(
-                                    MdiIcons.settingsHelper,
-                                    size: 18,
-                                    color: Colors.grey,
+                                      BorderRadius.all(Radius.circular(16)),
+                                  child: FadeInImage.assetNetwork(
+                                    image: user.profilePhoto != null
+                                        ? user.profilePhoto
+                                        : progressIndicator(
+                                            MColors.primaryPurple),
+                                    fit: BoxFit.fill,
+                                    height: 36,
+                                    width: 36,
+                                    placeholder: "assets/profile1.png",
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                           // Container(
@@ -654,259 +846,379 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                       height: 10,
                     ),
 
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, top: 8, bottom: 16),
-                      margin: EdgeInsets.only(
-                          left: 10, top: 4, right: 18, bottom: 0),
-                      child: SizedBox(
-                        //ขนาดPopular
-                        height: 300.0,
-                        // width: 800.0,
-                        child: ListView.builder(
-                          physics: ClampingScrollPhysics(),
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: posts.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              Card(
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(13.0),
-                            ),
-                            child: InkWell(
-                              onTap: () async {
-                                UserDataProfileNotifier profileNotifier =
-                                    Provider.of<UserDataProfileNotifier>(
-                                        context,
-                                        listen: false);
-
-                                JoinNotifier joinNotifier =
-                                    Provider.of<JoinNotifier>(context,
-                                        listen: false);
-
-                                // getEvenReqPosts(joinNotifier);
-                                var navigationResult =
-                                    await Navigator.of(context).push(
-                                  CupertinoPageRoute(
-                                    builder: (BuildContext context) =>
-                                        ChangeNotifierProvider(
-                                      create: (context) => JoinNotifier(),
-                                      builder: (context, child) =>
-                                          PostDetailsV1(
-                                              postspop[index], user, joinEvent),
-                                    ),
+                    _searchController.text == ""
+                        ? Container(
+                            padding: const EdgeInsets.only(
+                                left: 10, right: 10, top: 8, bottom: 16),
+                            margin: EdgeInsets.only(
+                                left: 10, top: 4, right: 18, bottom: 0),
+                            child: SizedBox(
+                              //ขนาดPopular
+                              height: 300.0,
+                              // width: 800.0,
+                              child: ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: posts.length,
+                                itemBuilder:
+                                    (BuildContext context, int index) => Card(
+                                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(13.0),
                                   ),
-                                );
-                                if (navigationResult == true) {
-                                  setState(() {
-                                    print("getProfile -getEvenReqPosts");
-                                    // getProfile(profileNotifier);
-                                    getEvenReqPosts(joinNotifier);
-                                  });
-                                }
-                              },
-                              child: Container(
-                                clipBehavior: Clip.hardEdge,
-                                decoration: BoxDecoration(
-                                    color: Color(0xffffffff),
-                                    border: Border.all(
-                                        color: Color(0xffeef2fa), width: 0.60),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(12))),
-                                width: 250,
-                                // height: 200,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Stack(
-                                        overflow: Overflow.visible,
-                                        children: [
-                                          AspectRatio(
-                                            aspectRatio: 2,
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(8),
-                                                  topRight: Radius.circular(8)),
-                                              child: CachedNetworkImage(
-                                                imageUrl: posts[index].image,
-                                                placeholder: (context, url) =>
-                                                    progressIndicator(
-                                                        MColors.primaryPurple),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Icon(Icons.error),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
+                                  child: InkWell(
+                                    onTap: () async {
+                                      UserDataProfileNotifier profileNotifier =
+                                          Provider.of<UserDataProfileNotifier>(
+                                              context,
+                                              listen: false);
+
+                                      JoinNotifier joinNotifier =
+                                          Provider.of<JoinNotifier>(context,
+                                              listen: false);
+
+                                      // getEvenReqPosts(joinNotifier);
+                                      var navigationResult =
+                                          await Navigator.of(context).push(
+                                        CupertinoPageRoute(
+                                          builder: (BuildContext context) =>
+                                              ChangeNotifierProvider(
+                                            create: (context) => JoinNotifier(),
+                                            builder: (context, child) =>
+                                                PostDetailsV1(postspop[index],
+                                                    user, joinEvent),
                                           ),
-                                          Positioned(
-                                            bottom: -16,
-                                            left: 16,
-                                            child: Container(
-                                              padding: EdgeInsets.only(
-                                                  left: 8,
-                                                  top: 4,
-                                                  right: 8,
-                                                  bottom: 4),
-                                              decoration: BoxDecoration(
-                                                  color: Color(0xffffffff),
-                                                  border: Border.all(
-                                                      color: Color(0xffeef2fa),
-                                                      width: 0.5),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Color(0xff1f1f1f)
-                                                            .withAlpha(150),
-                                                        blurRadius: 1,
-                                                        offset: Offset(0, 1))
-                                                  ],
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(8))),
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    '${format.format(posts[index].startdateTime.toDate())}',
-                                                    style:
-                                                        AppTheme.getTextStyle(
-                                                            themeData.textTheme
-                                                                .bodyText2,
-                                                            color: themeData
-                                                                .colorScheme
-                                                                .primary,
-                                                            fontWeight: 600),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  Text(
-                                                    '${format1.format(posts[index].startdateTime.toDate())}',
-                                                    style:
-                                                        AppTheme.getTextStyle(
-                                                            themeData.textTheme
-                                                                .bodyText2,
-                                                            fontSize: 11,
-                                                            color: themeData
-                                                                .colorScheme
-                                                                .primary,
-                                                            fontWeight: 600),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.only(
-                                          left: 16,
-                                          top: 24,
-                                          right: 16,
-                                          bottom: 16),
+                                        ),
+                                      );
+                                      if (navigationResult == true) {
+                                        setState(() {
+                                          print("getProfile -getEvenReqPosts");
+                                          // getProfile(profileNotifier);
+                                          getEvenReqPosts(joinNotifier);
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      clipBehavior: Clip.hardEdge,
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffffffff),
+                                          border: Border.all(
+                                              color: Color(0xffeef2fa),
+                                              width: 0.60),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(12))),
+                                      width: 250,
+                                      // height: 200,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: <Widget>[
-                                              Text(posts[index].name,
-                                                  style: titleStyle),
-                                              UIHelper.verticalSpace(4),
-                                              Row(
-                                                children: <Widget>[
-                                                  Icon(Icons.location_on,
-                                                      size: 16,
-                                                      color: Theme.of(context)
-                                                          .primaryColor),
-                                                  UIHelper.horizontalSpace(4),
-                                                  // ExpandableText(
-                                                  //   posts[index].place,
-                                                  //   style: subtitleStyle,
-                                                  //   expandText: 'show more',
-                                                  //   collapseText: 'show less',
-                                                  //   maxLines: 1,
-                                                  //   linkColor: Colors.blue,
-                                                  //   onExpandedChanged:
-                                                  //       (value) => print(value),
-                                                  // ),
-                                                ],
-                                              ),
-                                              Text(
-                                                posts[index].place,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                                           Container(
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: Row(
+                                            child: Stack(
+                                              overflow: Overflow.visible,
                                               children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      // Text(
-                                                      //   subject,
-                                                      //   style: AppTheme.getTextStyle(
-                                                      //       themeData.textTheme.caption,
-                                                      //       fontSize: 12,
-                                                      //       color: themeData.colorScheme.onBackground,
-                                                      //       fontWeight: 500,
-                                                      //       xMuted: true),
-                                                      // ),
-                                                      Container(
-                                                        margin: EdgeInsets.only(
-                                                            top: 2),
-                                                        child: Text(
-                                                          '${format2.format(posts[index].startdateTime.toDate())} -${format3.format(posts[index].entdateTime.toDate())} ',
+                                                AspectRatio(
+                                                  aspectRatio: 2,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(8),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    8)),
+                                                    child: CachedNetworkImage(
+                                                      imageUrl:
+                                                          posts[index].image,
+                                                      placeholder: (context,
+                                                              url) =>
+                                                          progressIndicator(
+                                                              MColors
+                                                                  .primaryPurple),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          Icon(Icons.error),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: -16,
+                                                  left: 16,
+                                                  child: Container(
+                                                    padding: EdgeInsets.only(
+                                                        left: 8,
+                                                        top: 4,
+                                                        right: 8,
+                                                        bottom: 4),
+                                                    decoration: BoxDecoration(
+                                                        color:
+                                                            Color(0xffffffff),
+                                                        border: Border.all(
+                                                            color: Color(
+                                                                0xffeef2fa),
+                                                            width: 0.5),
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                              color: Color(
+                                                                      0xff1f1f1f)
+                                                                  .withAlpha(
+                                                                      150),
+                                                              blurRadius: 1,
+                                                              offset:
+                                                                  Offset(0, 1))
+                                                        ],
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    8))),
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          '${format.format(posts[index].startdateTime.toDate())}',
                                                           style: AppTheme
                                                               .getTextStyle(
                                                                   themeData
                                                                       .textTheme
-                                                                      .caption,
-                                                                  fontSize: 14,
-                                                                  color: Colors
-                                                                      .black,
+                                                                      .bodyText2,
+                                                                  color: themeData
+                                                                      .colorScheme
+                                                                      .primary,
                                                                   fontWeight:
-                                                                      500,
-                                                                  xMuted: true),
+                                                                      600),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                        Text(
+                                                          '${format1.format(posts[index].startdateTime.toDate())}',
+                                                          style: AppTheme
+                                                              .getTextStyle(
+                                                                  themeData
+                                                                      .textTheme
+                                                                      .bodyText2,
+                                                                  fontSize: 11,
+                                                                  color: themeData
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  fontWeight:
+                                                                      600),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.only(
+                                                left: 16,
+                                                top: 24,
+                                                right: 16,
+                                                bottom: 16),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: <Widget>[
+                                                    Text(posts[index].name,
+                                                        style: titleStyle),
+                                                    UIHelper.verticalSpace(4),
+                                                    Row(
+                                                      children: <Widget>[
+                                                        Icon(Icons.location_on,
+                                                            size: 16,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor),
+                                                        UIHelper
+                                                            .horizontalSpace(4),
+                                                        // ExpandableText(
+                                                        //   posts[index].place,
+                                                        //   style: subtitleStyle,
+                                                        //   expandText: 'show more',
+                                                        //   collapseText: 'show less',
+                                                        //   maxLines: 1,
+                                                        //   linkColor: Colors.blue,
+                                                        //   onExpandedChanged:
+                                                        //       (value) => print(value),
+                                                        // ),
+                                                      ],
+                                                    ),
+                                                    Text(
+                                                      posts[index].place,
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Container(
+                                                  margin:
+                                                      EdgeInsets.only(top: 8),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            // Text(
+                                                            //   subject,
+                                                            //   style: AppTheme.getTextStyle(
+                                                            //       themeData.textTheme.caption,
+                                                            //       fontSize: 12,
+                                                            //       color: themeData.colorScheme.onBackground,
+                                                            //       fontWeight: 500,
+                                                            //       xMuted: true),
+                                                            // ),
+                                                            Container(
+                                                              margin: EdgeInsets
+                                                                  .only(top: 2),
+                                                              child: Text(
+                                                                '${format2.format(posts[index].startdateTime.toDate())} -${format3.format(posts[index].entdateTime.toDate())} ',
+                                                                style: AppTheme.getTextStyle(
+                                                                    themeData
+                                                                        .textTheme
+                                                                        .caption,
+                                                                    fontSize:
+                                                                        14,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        500,
+                                                                    xMuted:
+                                                                        true),
+                                                              ),
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
+                                                      // Container(
+                                                      //   child: Icon(
+                                                      //     MdiIcons.heartOutline,
+                                                      //     color: themeData
+                                                      //         .colorScheme.primary,
+                                                      //   ),
+                                                      // )
                                                     ],
                                                   ),
-                                                ),
-                                                // Container(
-                                                //   child: Icon(
-                                                //     MdiIcons.heartOutline,
-                                                //     color: themeData
-                                                //         .colorScheme.primary,
-                                                //   ),
-                                                // )
+                                                )
                                               ],
                                             ),
                                           )
                                         ],
                                       ),
-                                    )
-                                  ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
+                          )
+                        : Container(),
                     ///////////////////ค้นหา
+                    _searchController.text == ""
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              return ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                itemCount: postsrecom.length,
+                                padding: const EdgeInsets.only(top: 8),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return PostListRecomView(
+                                    postsrecom: postsrecom[index],
+                                    interest1: interest1,
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
+                    _searchController.text == ""
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              return ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                itemCount: postsrecom1.length,
+                                padding: const EdgeInsets.only(top: 8),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return PostListRecom1View(
+                                    postsrecom1: postsrecom1[index],
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
+
+                    _searchController.text == ""
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              return ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                itemCount: postsrecom2.length,
+                                padding: const EdgeInsets.only(top: 8),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return PostListRecom2View(
+                                    postsrecom2: postsrecom2[index],
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
+                    _searchController.text == ""
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              return ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                itemCount: postsrecom3.length,
+                                padding: const EdgeInsets.only(top: 8),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return PostListRecom3View(
+                                    postsrecom3: postsrecom3[index],
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
+                    _searchController.text == ""
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              return ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                itemCount: postsrecom4.length,
+                                padding: const EdgeInsets.only(top: 8),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return PostListRecom4View(
+                                    postsrecom4: postsrecom4[index],
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
                     _searchController.text == ""
                         ? Builder(
                             builder: (BuildContext context) {
@@ -934,7 +1246,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                                 padding: const EdgeInsets.only(top: 8),
                                 itemBuilder:
                                     (BuildContext context, int index) =>
-                                        buildTripCard(
+                                        buildEvenListSearching(
                                             context, _resultsList[index], user),
                               );
                             },
@@ -951,7 +1263,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
     );
   }
 
-  Widget buildTripCard(
+  Widget buildEvenListSearching(
       BuildContext context, DocumentSnapshot document, UserDataProfile user) {
     final posts = Post.fromSnapshot(document);
 

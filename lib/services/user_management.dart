@@ -36,7 +36,26 @@ storeNewUser(_name, _phone, _email, _gender, age, birthDate) async {
     'age': age,
     'birthDate': tempDate,
     'profilePhoto':
-        'https://firebasestorage.googleapis.com/v0/b/we-invited.appspot.com/o/placeholderperson.jpg?alt=media&token=832d9ccc-5027-4a0a-950a-14c46ec13905',
+        'https://firebasestorage.googleapis.com/v0/b/we-invited.appspot.com/o/placeholderperson2.jpg?alt=media&token=a2dd3d04-9960-4aa1-a268-b8b93bd4af8c',
+  }).catchError((e) {
+    print(e);
+  });
+  FirebaseFirestore.instance
+      .collection("interest")
+      .doc(_email)
+      .collection('like')
+      .doc(_email)
+      .set({
+    'Business': 0,
+    'Education': 0,
+    'Food': 0,
+    'Games': 0,
+    'Health': 0,
+    'Nature': 0,
+    'Other': 0,
+    'Shopping': 0,
+    'Sport': 0,
+    'Party': 0,
   }).catchError((e) {
     print(e);
   });
@@ -88,8 +107,6 @@ getProfile(UserDataProfileNotifier profileNotifier) async {
   profileNotifier.userDataProfileList = _userDataProfileList;
 }
 
-
-
 //Updating User profile
 updateProfile(_name, _gender) async {
   print("updateProfile");
@@ -105,8 +122,8 @@ updateProfile(_name, _gender) async {
     },
   );
 }
-//Updating User whit photo profile
 
+//Updating User whit photo profile
 Future updateProfilePhoto(file) async {
   final db = FirebaseFirestore.instance;
   final uEmail = await AuthService().getCurrentEmail();
@@ -140,154 +157,4 @@ Future updateProfilePhoto(file) async {
   await profileRef1.doc(udid).update({
     'postbyimage': profilePhoto,
   });
-}
-
-// Adding new address
-storeAddress(
-  fullLegalName,
-  addressLocation,
-  addressNumber,
-) async {
-  final db = FirebaseFirestore.instance;
-  final uEmail = await AuthService().getCurrentEmail();
-
-  await db
-      .collection("userData")
-      .doc(uEmail)
-      .collection("address")
-      .doc(uEmail)
-      .set({
-    'fullLegalName': fullLegalName,
-    'addressLocation': addressLocation,
-    'addressNumber': addressNumber,
-  }).catchError((e) {
-    print(e);
-  });
-}
-
-//get users address
-// getAddress(UserDataAddressNotifier addressNotifier) async {
-//   final uEmail = await AuthService().getCurrentEmail();
-//
-//   QuerySnapshot snapshot = await FirebaseFirestore.instance
-//       .collection("userData")
-//       .doc(uEmail)
-//       .collection("address")
-//       .get();
-//
-//   List<UserDataAddress> _userDataAddressList = [];
-//
-//   snapshot.docs.forEach((doc) {
-//     UserDataAddress userDataAddress = UserDataAddress.fromMap(doc.data());
-//     _userDataAddressList.add(userDataAddress);
-//   });
-//
-//   addressNotifier.userDataAddressList = _userDataAddressList;
-// }
-
-//Updating new address
-updateAddress(
-  fullLegalName,
-  addressLocation,
-  addressNumber,
-) async {
-  final db = FirebaseFirestore.instance;
-  final uEmail = await AuthService().getCurrentEmail();
-
-  CollectionReference addressRef =
-      db.collection("userData").doc(uEmail).collection("address");
-  await addressRef.doc(uEmail).update(
-    {
-      'fullLegalName': fullLegalName,
-      'addressLocation': addressLocation,
-      'addressNumber': addressNumber,
-    },
-  );
-}
-
-//Adding new card
-storeNewCard(
-  cardHolder,
-  cardNumber,
-  validThrough,
-  securityCode,
-) async {
-  final db = FirebaseFirestore.instance;
-  final uEmail = await AuthService().getCurrentEmail();
-
-  await db
-      .collection("userData")
-      .doc(uEmail)
-      .collection("card")
-      .doc(uEmail)
-      .set({
-    'cardHolder': cardHolder,
-    'cardNumber': cardNumber,
-    'validThrough': validThrough,
-    'securityCode': securityCode,
-  }).catchError((e) {
-    print(e);
-  });
-}
-
-//get users card
-// getCard(UserDataCardNotifier cardNotifier) async {
-//   final uEmail = await AuthService().getCurrentEmail();
-//
-//   QuerySnapshot snapshot = await FirebaseFirestore.instance
-//       .collection("userData")
-//       .doc(uEmail)
-//       .collection("card")
-//       .get();
-//
-//   List<UserDataCard> _userDataCardList = [];
-//
-//   snapshot.docs.forEach((doc) {
-//     UserDataCard userDataCard = UserDataCard.fromMap(doc.data());
-//     _userDataCardList.add(userDataCard);
-//   });
-//
-//   cardNotifier.userDataCardList = _userDataCardList;
-// }
-
-//Updating new card
-updateCard(
-  cardHolder,
-  cardNumber,
-  validThrough,
-  securityCode,
-) async {
-  final db = FirebaseFirestore.instance;
-  final uEmail = await AuthService().getCurrentEmail();
-
-  CollectionReference cardRef =
-      db.collection("userData").doc(uEmail).collection("card");
-  await cardRef.doc(uEmail).update(
-    {
-      'cardHolder': cardHolder,
-      'cardNumber': cardNumber,
-      'validThrough': validThrough,
-      'securityCode': securityCode,
-    },
-  );
-}
-
-saveDeviceToken() async {
-  final db = FirebaseFirestore.instance;
-  final _fcm = FirebaseMessaging();
-
-  final uEmail = await AuthService().getCurrentEmail();
-
-  //Getting device token
-  String fcmToken = await _fcm.getToken();
-
-  //Storing token
-  if (fcmToken != null) {
-    await db.collection("userToken").doc(uEmail).set({
-      'userEmail': uEmail,
-      'token': fcmToken,
-      'createdAt': FieldValue.serverTimestamp(),
-      'platform': Platform.operatingSystem,
-    });
-  }
 }

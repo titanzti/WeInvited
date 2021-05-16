@@ -54,7 +54,7 @@ class _CategoryCardState extends State<CategoryCard> {
               ? () {
                   PostNotifier postsNotifier =
                       Provider.of<PostNotifier>(context, listen: false);
-                  getPosts1(postsNotifier, _title);
+                  getPostswithcategory(postsNotifier, _title);
                   print('เชื่อมต่อ');
 
                   UserDataProfileNotifier profileNotifier =
@@ -102,7 +102,7 @@ class _CategoryCardState extends State<CategoryCard> {
     //
     // var joins = joinNotifier.joineventList;
 
-    return FutureBuilder(
+    return StreamBuilder(
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         return GestureDetector(
           key: _scaffoldKey,
@@ -132,7 +132,7 @@ class _CategoryCardState extends State<CategoryCard> {
               setState(() {
                 print("setstatebuildTripCard");
                 getProfile(profileNotifier);
-                getPosts1(postsNotifier, _title);
+                getPostswithcategory(postsNotifier, _title);
                 getEvenReqPosts(joinNotifier, myuid);
               });
             }
@@ -159,7 +159,7 @@ class _CategoryCardState extends State<CategoryCard> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         SizedBox(
-                          height: 50,
+                          height: 70,
                         ),
                         Text(
                           widget._title,

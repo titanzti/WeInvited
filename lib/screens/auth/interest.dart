@@ -27,16 +27,16 @@ class _InterestScreenState extends State<InterestScreen> {
 
   // list of string options
   List<String> options = [
-    '⚽️ Sport',
-    '📚 Education',
-    '🍽 Food & Drink',
-    '🕹 Games',
-    '🌳 Nature & Park',
-    '🎉 Party',
-    '🛍 Shopping',
-    '🧠 Health',
-    '💰 Business',
-    '⁉️ Other',
+    'Business',
+    'Education',
+    'Food',
+    'Games',
+    'Health',
+    'Nature',
+    'Other',
+    'Party',
+    'Shopping',
+    'Sport',
   ];
 
   var select;

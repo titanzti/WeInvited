@@ -1,11 +1,18 @@
 import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:we_invited/notifier/OtherUserData_notifier.dart';
 import 'package:we_invited/notifier/join_notifier.dart';
+import 'package:we_invited/notifier/postRecom_notifier.dart';
+import 'package:we_invited/notifier/postRecom1_notifier.dart';
+
+import 'package:we_invited/notifier/postRecom2_notifier.dart';
+
 import 'package:we_invited/notifier/userData_notifier.dart';
+import 'package:we_invited/screens/auth/analytics_service.dart';
 import 'package:we_invited/screens/auth/intro_screen.dart';
 import 'package:we_invited/screens/create_event/Post_activity.dart';
 import 'package:we_invited/screens/home/NavigationBar.dart';
@@ -105,7 +112,28 @@ class _HomeControllerState extends State<HomeController> {
                         // ChangeNotifierProvider(
                         //   create: (context) => CartNotifier(),
                         // ),
+                        ChangeNotifierProvider(
+                          create: (context) => PostRrcomNotifier(),
+                          // value: PostNotifier(),
+                        ),
+                       ChangeNotifierProvider(
+                          create: (context) => PostRrcomNotifier1(),
+                          // value: PostNotifier(),
+                        ),
 
+                         ChangeNotifierProvider(
+                          create: (context) => PostRrcomNotifier2(),
+                          // value: PostNotifier(),
+                        ),
+ ChangeNotifierProvider(
+                          create: (context) => PostRrcomNotifier3(),
+                          // value: PostNotifier(),
+                        ),
+
+ChangeNotifierProvider(
+                          create: (context) => PostRrcomNotifier4(),
+                          // value: PostNotifier(),
+                        ),
                         // ChangeNotifierProvider(
                         //   create: (context) => UserDataAddressNotifier(),
                         // ),

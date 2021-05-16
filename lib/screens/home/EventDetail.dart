@@ -20,6 +20,8 @@ import 'package:we_invited/models/user.dart';
 import 'package:we_invited/notifier/join_notifier.dart';
 import 'package:we_invited/notifier/post_notifier.dart';
 import 'package:we_invited/notifier/userData_notifier.dart';
+import 'package:we_invited/screens/create_event/Post_activity.dart';
+import 'package:we_invited/screens/create_event/edit_event.dart';
 import 'package:we_invited/screens/profile/otherprofile.dart';
 import 'package:we_invited/services/auth_service.dart';
 import 'package:we_invited/services/user_management.dart';
@@ -55,9 +57,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   double opacity2 = 0.0;
   double opacity3 = 0.0;
   var str;
-
+  int totallike;
   bool liked = false;
-  int mylikes;
+  int mylikes = 0;
   var startIndex;
   var endIndex;
   var start = "(";
@@ -76,11 +78,14 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   var mypostuid;
   var myuid;
   var uidpost;
+  var mycategory;
   var otheremail;
-  int totallike;
+
   bool checkissendrequest = false;
   String toggleJoin;
   bool visibilitybutt = false;
+  int conte = 0;
+  int open = 0;
 
   AnimationController controller;
   AnimationController bodyScrollAnimationController;
@@ -97,10 +102,12 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   DateTime dateexp = DateTime.now();
 
 /*ฟังชั่นกดไลท์ */
-  Future likepost(int mylike, String postId) async {
+  Future likepost(int totallike, String postId) async {
     final uEmail = await AuthService().getCurrentEmail();
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
@@ -108,23 +115,29 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .update({'likes': totallike + 1});
 
     return FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
-        .update({'likes': 1});
+        .set({'likes': 1});
   }
 
 /*ฟังชั่นกดอันไลท์ */
-  Future unlikepost(int mylike, String postId) async {
+  Future unlikepost(int totallike, String postId) async {
     final uEmail = await AuthService().getCurrentEmail();
 
     await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .collection('likes')
         .doc(uEmail)
@@ -132,6 +145,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
     return await FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postId)
         .update({'likes': totallike - 1});
   }
@@ -145,6 +160,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     /*ดึงค่าไลท์จากcollection/Posts/collection/likes */
     FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .doc(postid)
         .collection('likes')
         .doc(uEmail)
@@ -162,16 +179,17 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     /*ดึงค่าไลท์จากcollection/Posts/likes */
     FirebaseFirestore.instance
         .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
         .where('postid', isEqualTo: postid)
         .get()
         .then((querySnapshot) {
       //print(querySnapshot);
-      int totallike;
-      totallike = querySnapshot.docs.length;
+      // totallike = querySnapshot.docs.length;
       print('totallike$totallike');
 
       querySnapshot.docs.forEach((value) {
-        print('testlike=>>>>>>${value.get('likes')}');
+        // print('testlike=>>>>>>${value.get('likes')}');
       });
     }).catchError((onError) {
       print("getCloudFirestoreUsers: ERROR");
@@ -211,8 +229,36 @@ class _PostDetailsV1State extends State<PostDetailsV1>
               ? () {
                   getDataFromJoinEvent();
                   // checkData();
+                  //
+                  setinterest();
 
                   visibilitybutt = false;
+                  open = conte + 1;
+
+                  // print('mycategory=>>>$mycategory');
+                  // switch (mycategory) {
+                  //   case 'Party':
+                  //     FirebaseFirestore.instance
+                  //         .collection("interest")
+                  //         .doc(widget.userData.email)
+                  //         .collection('like')
+                  //         .doc(widget.userData.email)
+                  //         .update({
+                  //       'Party': open + 1,
+                  //     }).catchError((e) {
+                  //       print(e);
+                  //     });
+                  //     print('Party1');
+                  //     break;
+                  //   // case PI:
+                  //   //   // do something else
+                  //   //   break;
+                  // }
+                  mycategory = postDetails.category;
+                  print('mycategory$mycategory');
+
+                  print('open=>>>$open');
+                  // print(postDetails.category);
 
                   JoinNotifier joinNotifier =
                       Provider.of<JoinNotifier>(context, listen: false);
@@ -239,9 +285,6 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
                   print(str.substring(startIndex + start.length, endIndex));
 
-                  if (isExpired == false) {
-                    return expireeven();
-                  }
                   otheremail = postDetails.emailuser;
 
                   // checkpostidEvent= _joinEvent.requestpostid;
@@ -262,7 +305,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                   // BannerAdNotifier bannerAdNotifier =
                   // Provider.of<BannerAdNotifier>(context, listen: false);
                   // getBannerAds(bannerAdNotifier);
-                  mypostid = postDetails.postid;
+                  getlikes(mypostid);
 
                   // checkIfSentRequest();
                 }()
@@ -277,6 +320,197 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     bodyScrollAnimationController.dispose();
 
     super.dispose();
+  }
+
+  Future setinterest() async {
+    print("getinterest");
+    final uEmail = await AuthService().getCurrentEmail();
+    FirebaseFirestore.instance
+        .collection("interest")
+        .doc(uEmail)
+        .collection('like')
+        // .where('Party', isEqualTo: 'Party')
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((value) {
+        int totalcategoryBusiness = value.get('Business');
+        int totalcategoryEducation = value.get('Education');
+        int totalcategoryFood = value.get('Food');
+        int totalcategoryGames = value.get('Games');
+        int totalcategoryParty = value.get('Party');
+
+        int totalcategoryHealth = value.get('Health');
+        int totalcategoryNature = value.get('Nature');
+        int totalcategoryOther = value.get('Other');
+        int totalcategoryShopping = value.get('Shopping');
+        int totalcategorySport = value.get('Sport');
+
+        // print(value.get('Party'));
+        if (mycategory == 'Party') {
+          print('Party');
+          FirebaseFirestore.instance
+              .collection("interest")
+              .doc(widget.userData.email)
+              .collection('like')
+              .doc(widget.userData.email)
+              .update({
+            'Party': totalcategoryParty + 1,
+          }).catchError((e) {
+            print(e);
+          });
+
+          if (!value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .set({
+              'Party': totalcategoryParty + 1,
+            }).catchError((e) {
+              print(e);
+            });
+          }
+        }
+
+        if (mycategory == 'Business') {
+          FirebaseFirestore.instance
+              .collection("interest")
+              .doc(widget.userData.email)
+              .collection('like')
+              .doc(widget.userData.email)
+              .update({
+            'Business': totalcategoryBusiness + 1,
+          }).catchError((e) {
+            print(e);
+          });
+          print('Business');
+        }
+        if (mycategory == 'Education') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Education': totalcategoryEducation + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Games');
+          }
+        }
+        if (mycategory == 'Food') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Food': totalcategoryFood + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Food');
+          }
+        }
+        if (mycategory == 'Games') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Games': totalcategoryGames + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Games');
+          }
+        }
+        if (mycategory == 'Health') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Health': totalcategoryHealth + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Health');
+          }
+        }
+        if (mycategory == 'Nature') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Nature': totalcategoryNature + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Nature');
+          }
+        }
+        if (mycategory == 'Other') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Other': totalcategoryOther + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Other');
+          }
+        }
+
+        if (mycategory == 'Shopping') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Shopping': totalcategoryShopping + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Shopping');
+          }
+        }
+        if (mycategory == 'Sport') {
+          if (value.exists) {
+            FirebaseFirestore.instance
+                .collection("interest")
+                .doc(widget.userData.email)
+                .collection('like')
+                .doc(widget.userData.email)
+                .update({
+              'Sport': totalcategorySport + 1,
+            }).catchError((e) {
+              print(e);
+            });
+            print('Sport');
+          }
+        }
+      });
+    }).catchError((onError) {
+      print(onError);
+    });
   }
 
   getEvenReqPosts(JoinNotifier joinNotifier) async {
@@ -306,15 +540,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
   @override
   Widget build(BuildContext context) {
-    // print(new DateFormat.yMMMd().format(dateexp));
-    // print(DateFormat.yMMMd().format(postDetails.entdateTime.toDate()));
-    // print(widget.userData.email);
-    // print('=joinid>>>>>>>>>>>>>>>>$joinid');
-
     isExpired = dateexp.isBefore(postDetails.entdateTime.toDate());
     // print('isExpired$isExpired');
-    getlikes(mypostid);
-    // mylikes = postDetails.likes;
+    mypostid = postDetails.postid;
 
     // getData();
     JoinNotifier joinNotifier =
@@ -327,7 +555,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     // print(checkpostidEvent);
     // print(checktype);
     // print(joinEvent.requestpostid);
-    print('_token=>>>>>>>>>>>>>>>>>>>$_token');
+    //
+    // print('_token=>>>>>>>>>>>>>>>>>>>$_token');
 
     headerImageSize = MediaQuery.of(context).size.height / 2.5;
 
@@ -335,8 +564,14 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     final User user = auth.currentUser;
     final uid = user.uid.toString();
     myuid = uid;
+    // print('totallike=>>>>>$totallike);
+
     totallike = postDetails.likes;
-    // print('totallike=>>>>>$totallike');
+
+    print('totallike=>>>>>$totallike');
+    if (isExpired == false) {
+      expireeven();
+    }
 
     var postuid = postDetails.postid;
     // checktype=joinEvent.type;
@@ -450,6 +685,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
   expireeven() {
     Dialogs.materialDialog(
+        // barrierDismissible: false,
         color: Colors.white,
         // msg: 'Congratulations, you won 500 points',
         title: 'Expire',
@@ -458,10 +694,19 @@ class _PostDetailsV1State extends State<PostDetailsV1>
         actions: [
           IconsButton(
             onPressed: () async {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (BuildContext context) => MyApp()),
-                  (Route<dynamic> route) => false);
+              print('กดออก');
+              Navigator.pop(context);
+              // Navigator.of(context).pop();
+
+              // WidgetsBinding.instance.addPostFrameCallback((_) {
+              //   Navigator.pushReplacement(
+              //       context, MaterialPageRoute(builder: (_) => MyApp()));
+              // });
+
+              // Navigator.pushAndRemoveUntil(
+              //     context,
+              //     MaterialPageRoute(builder: (BuildContext context) => MyApp()),
+              //     (Route<dynamic> route) => false);
             },
             text: 'Close',
             // iconData: Icons.done,
@@ -597,9 +842,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () async {
-            print('$mypostid โพสของฉัน');
-            print('$checkpostidEvent โพสidอีเว้น');
-            print('$checksenderUid uidคนส่ง');
+            // print('$mypostid โพสของฉัน');
+            // print('$checkpostidEvent โพสidอีเว้น');
+            // print('$checksenderUid uidคนส่ง');
 
             //  if (mypostid!=checkpostidEvent) {
             //
@@ -616,6 +861,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   AlertCancelScreen() {
     Alert(
       context: context,
+
       // type: AlertType.info,
       title: "ยกเลิกคำขอ",
       content: Column(
@@ -648,15 +894,15 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                       fit: BoxFit.cover),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: themeData.colorScheme.primary.withAlpha(24),
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
+              // Container(
+              //   padding: EdgeInsets.all(6),
+              //   decoration: BoxDecoration(
+              //     color: themeData.colorScheme.primary.withAlpha(24),
+              //     borderRadius: BorderRadius.all(Radius.circular(8)),
+              //   ),
+              // ),
               SizedBox(
-                width: 30,
+                width: 50,
               ),
               Icon(
                 MdiIcons.accountArrowRight,
@@ -664,10 +910,10 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                 color: themeData.colorScheme.primary,
               ),
               SizedBox(
-                width: 30,
+                width: 25,
               ),
               SizedBox(
-                width: 25,
+                width: 20,
               ),
               Container(
                 width: 50,
@@ -697,9 +943,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () async {
-            print('$mypostid โพสของฉัน');
-            print('$checkpostidEvent โพสidอีเว้น');
-            print('$checksenderUid uidคนส่ง');
+            // print('$mypostid โพสของฉัน');
+            // print('$checkpostidEvent โพสidอีเว้น');
+            // print('$checksenderUid uidคนส่ง');
 
             // if(mypostid==checkpostidEvent&& myuid == checksenderUid){
             //   retractrequest();
@@ -735,6 +981,111 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     ).show();
   }
 
+  deletAlert() {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Delet",
+      // desc: "Flutter is more awesome with RFlutter Alert.",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Delet",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () async {
+            deletmypost();
+            Navigator.pop(context);
+          },
+          width: 120,
+        )
+      ],
+    ).show();
+  }
+
+  deletmypost() async {
+    print('deletmypost');
+    // if (this.mounted) {
+    //   setState(() {
+    //     // following = false;
+    //     sentrequest = false;
+    //     acceptedrequest = false;
+    //     // toggleFollow = "Follow";
+    //   });
+    // }
+    await FirebaseFirestore.instance
+        .collection('Posts')
+        // .where('requestpostid', isEqualTo: mypostid)
+        .where('postid', isEqualTo: postDetails.postid)
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+              querySnapshot.docs.forEach((doc) {
+                if (doc.exists) {
+                  doc.reference.delete();
+                  setState(() {
+                    visibilitybutt = false;
+                    // print(visibilitybutt.toString());
+                  });
+                }
+              })
+            });
+
+    //   await  db.collection("JoinEvent")
+    //       .doc(uEmail)
+    //       .collection('JoinEventList')
+    //       .doc()
+    //     .get()
+    //     .then((doc) {
+    //   if (doc.exists) {
+    //     doc.reference.delete();
+    //   }
+    // });
+    print('deletmypost successfully');
+  }
+
+  editAlert() {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Edit?",
+      // desc: "Flutter is more awesome with RFlutter Alert.",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Edit",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () async {
+            print('postDetails.image${postDetails.image}');
+            // postsNotifier.currentPost = null;
+
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (BuildContext context) {
+                return Editevent(
+                  isUpdating: true,
+                  name: postDetails.name,
+                  imageUrlEdit: postDetails.image,
+                  description: postDetails.description,
+                  Numpeople: double.parse(postDetails.Numpeople),
+                  agerange: postDetails.agerange,
+                  category: postDetails.category,
+                  startdateTime: postDetails.startdateTime,
+                  place: postDetails.place,
+                  entdateTime: postDetails.entdateTime,
+                  gender: postDetails.gender,
+                  postid: postDetails.postid,
+
+                  // file: postDetails.image,
+                );
+              }),
+            );
+          },
+          width: 120,
+        )
+      ],
+    ).show();
+  }
+
   getRequestStatus() async {
     final joineventref = FirebaseFirestore.instance.collection('JoinEvent');
     return joineventref
@@ -749,8 +1100,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
 /*ลบrequest */
   retractrequest() async {
-    final db = FirebaseFirestore.instance;
-    final uEmail = await AuthService().getCurrentEmail();
+    // final db = FirebaseFirestore.instance;
+    // final uEmail = await AuthService().getCurrentEmail();
 
     print('retracted');
     // if (this.mounted) {
@@ -774,7 +1125,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                   doc.reference.delete();
                   setState(() {
                     visibilitybutt = false;
-                    print(visibilitybutt.toString());
+                    // print(visibilitybutt.toString());
                   });
                 }
               })
@@ -837,7 +1188,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
       });
 
       print("eventreq successfully");
-      print(visibilitybutt.toString());
+      // print(visibilitybutt.toString());
     }).catchError((onError) {
       print("onError");
     });
@@ -850,78 +1201,6 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
     print('JoinEvent  successfully: ${joinevent.toString()}');
   }
-
-  // checkIfSentRequest() async {
-  //   final chatReference = FirebaseFirestore.instance.collection('JoinEvent');
-  //   await chatReference
-  //       .doc(myuid)
-  //       .collection('JoinEventList')
-  //       .doc('bQoJCNb4kL2gj2RrfhE9')
-  //       .get()
-  //       .then((value) => {
-  //             print(value.exists),
-  //             if (value.exists)
-  //               {
-  //                 sentrequest = value.exists,
-  //                 chatReference
-  //                     .doc(myuid)
-  //                     .collection('JoinEventList')
-  //                     .doc('bQoJCNb4kL2gj2RrfhE9')
-  //                     .get()
-  //                     .then((val) {
-  //                   if (!(val.exists) &&
-  //                       value.data()['requestpostid'] == mypostid) {
-  //                     setState(() {
-  //                       // following = true;
-  //                       sentrequest = true;
-  //                       acceptedrequest = true;
-  //                       print('acceptedrequest$acceptedrequest');
-
-  //                       checkIfAlreadyFollowing();
-  //                     });
-  //                   }
-  //                 })
-  //               }
-  //           });
-  // }
-
-  // checkIfAlreadyFollowing() async {
-  //   final uEmail = await AuthService().getCurrentEmail();
-  //   CollectionReference joineventref =
-  //       FirebaseFirestore.instance.collection("JoinEvent");
-  //   CollectionReference users =
-  //       FirebaseFirestore.instance.collection('JoinEvent');
-
-  //   // final joineventref = FirebaseFirestore.instance.collection('JoinEvent');
-
-  //   // await   users.doc(uEmail).collection('JoinEventList')
-  //   //        .get()
-  //   //        .then((QuerySnapshot value) => {
-  //   //      print(value.exists),
-  //   //      if (this.mounted){
-  //   //          setState(() {
-  //   //            if (value.exists) {
-  //   //              sentrequest = value.exists;
-  //   //
-  //   //              if (!(value.exists) && value.data()['type'] != 'request') {
-  //   //                if (this.mounted) {
-  //   //                  setState(() {
-  //   //                    sentrequest = true;
-  //   //                    acceptedrequest = true;
-  //   //
-  //   //                    print(value);
-  //   //                  });
-  //   //                }
-  //   //                eventreq(_joinEvent);
-  //   //                print("ไม่มีค่า");
-  //   //              }
-  //   //              print("มีค่า");
-  //   //
-  //   //            }
-  //   //          })
-  //   //        }
-  //   //    });
-  // }
 
   Future getCloudFirestoreJoinEvent() async {
     print("getCloudFirestoreJoinEvent");
@@ -938,23 +1217,23 @@ class _PostDetailsV1State extends State<PostDetailsV1>
       //print(querySnapshot);
       var totalreq;
       totalreq = querySnapshot.docs.length.toString();
-      print(totalreq);
-      print("requestpostid: results: length: " +
-          querySnapshot.docs.length.toString());
+      // print(totalreq);
+      // print("requestpostid: results: length: " +
+      //     querySnapshot.docs.length.toString());
       querySnapshot.docs.forEach((value) {
-        print("requestpostid: results: value");
-        print(value.get('requestpostid'));
+        // print("requestpostid: results: value");
+        // print(value.get('requestpostid'));
 
         if ((value.exists) && value.get('requestpostid') == mypostid) {
-          print(value.get('requestpostid'));
+          // print(value.get('requestpostid'));
           joinid = value.get('joinid');
-          print(joinid = value.get('joinid'));
+          // print(joinid = value.get('joinid'));
 
           if (this.mounted) {
             setState(() {
               checkissendrequest = true;
               acceptedrequest = true;
-              print('sentrequest$sentrequest');
+              // print('sentrequest$sentrequest');
             });
           }
         }
@@ -1010,7 +1289,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                   });
                 }
 
-                print(checkpostidEvent);
+                // print(checkpostidEvent);
                 // print(checksenderUid);
               })
             });
@@ -1114,6 +1393,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     );
   }
 
+  List _optionsappbar = ['Edit', 'Delete', 'Report'];
+
   Widget buildHeaderButton({bool hasTitle = false}) {
     const titleStyle = TextStyle(
         color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold);
@@ -1158,7 +1439,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                 // color: hasTitle ? Colors.white : Colors.black,
                 onSelected: handleClick,
                 itemBuilder: (BuildContext context) {
-                  return {'Report'}.map((String choice) {
+                  return _optionsappbar.map((choice) {
                     return PopupMenuItem<String>(
                       value: choice,
                       child: Text(choice),
@@ -1179,6 +1460,12 @@ class _PostDetailsV1State extends State<PostDetailsV1>
       case 'Report':
         test3();
         break;
+      case 'Delete':
+        deletAlert();
+        break;
+      case 'Edit':
+        editAlert();
+        break;
     }
   }
 
@@ -1188,49 +1475,52 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     return Container(
       child: Row(
         children: [
-          Text(
-            postDetails.name,
-            style: headerStyle.copyWith(fontSize: 32),
-          ),
-          Card(
-            color: DesignCourseAppTheme.nearlyBlue,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0)),
-            elevation: 20.0,
-            child: Container(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: IconButton(
-                  padding: EdgeInsets.only(left: 2),
-                  onPressed: liked
-                      ? () {
-                          setState(() {
-                            liked = false;
-                            unlikepost(mylikes, postDetails.postid);
-                          });
-                        }
-                      : () {
-                          setState(() {
-                            liked = true;
-                            likepost(mylikes, postDetails.postid);
-                          });
-                        },
-                  icon: liked
-                      ? Icon(Icons.favorite_rounded)
-                      : Icon(Icons.favorite_border),
-                  iconSize: 25,
-                  color: liked ? Colors.redAccent : Colors.white,
-                ),
-
-                // Icon(
-                //   Icons.favorite,
-                //   color: DesignCourseAppTheme.nearlyWhite,
-                //   size: 20,
-                // ),
-              ),
+          Expanded(
+            child: Text(
+              postDetails.name,
+              style: headerStyle.copyWith(fontSize: 32),
             ),
           ),
+
+          // Card(
+          //   color: DesignCourseAppTheme.nearlyBlue,
+          //   shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(50.0)),
+          //   elevation: 20.0,
+          //   child: Container(
+          //     width: 40,
+          //     height: 40,
+          //     child: Center(
+          //       child: IconButton(
+          //         padding: EdgeInsets.only(left: 2),
+          //         onPressed: liked
+          //             ? () {
+          //                 setState(() {
+          //                   liked = false;
+          //                   unlikepost(mylikes, postDetails.postid);
+          //                 });
+          //               }
+          //             : () {
+          //                 setState(() {
+          //                   liked = true;
+          //                   likepost(mylikes, postDetails.postid);
+          //                 });
+          //               },
+          //         icon: liked
+          //             ? Icon(Icons.favorite_rounded)
+          //             : Icon(Icons.favorite_border),
+          //         iconSize: 25,
+          //         color: liked ? Colors.redAccent : Colors.grey,
+          //       ),
+
+          //       // Icon(
+          //       //   Icons.favorite,
+          //       //   color: DesignCourseAppTheme.nearlyWhite,
+          //       //   size: 20,
+          //       // ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -1280,24 +1570,56 @@ class _PostDetailsV1State extends State<PostDetailsV1>
           UIHelper.horizontalSpace(16),
 // SizedBox(width: 100,),
           Spacer(),
+///////////////////////// กดไลท์
+          Container(
+            padding: const EdgeInsets.all(2),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  child: Card(
+                    color: DesignCourseAppTheme.nearlyBlue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50.0)),
+                    elevation: 20.0,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      child: Center(
+                        child: IconButton(
+                          padding: EdgeInsets.only(left: 2),
+                          onPressed: liked
+                              ? () {
+                                  setState(() {
+                                    liked = false;
+                                    unlikepost(totallike, postDetails.postid);
+                                  });
+                                }
+                              : () {
+                                  setState(() {
+                                    liked = true;
+                                    likepost(totallike, postDetails.postid);
+                                  });
+                                },
+                          icon: liked
+                              ? Icon(Icons.favorite_rounded)
+                              : Icon(Icons.favorite_border),
+                          iconSize: 25,
+                          color: liked ? Colors.redAccent : Colors.grey,
+                        ),
 
-          // Container(
-          //   padding: const EdgeInsets.all(2),
-          //   child: Row(
-          //     children: <Widget>[
-          //       Container(
-          //         child: FloatingActionButton(
-          //           mini: true,
-          //           onPressed: () => setState(() => isFavorite = !isFavorite),
-          //           child: Icon(
-          //               isFavorite ? Icons.favorite : Icons.favorite_border,
-          //               color: Colors.white),
-          //         ),
-          //       ),
-          //       // UIHelper.horizontalSpace(8),
-          //     ],
-          //   ),
-          // ),
+                        // Icon(
+                        //   Icons.favorite,
+                        //   color: DesignCourseAppTheme.nearlyWhite,
+                        //   size: 20,
+                        // ),
+                      ),
+                    ),
+                  ),
+                ),
+                // UIHelper.horizontalSpace(8),
+              ],
+            ),
+          ),
           // Card(
           //   shape: CircleBorder(),
           //   elevation: 0,
@@ -1355,7 +1677,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text("About", style: headerStyle),
+        Text("รายละเอียด", style: headerStyle),
         UIHelper.verticalSpace(),
         InkWell(
           child: ExpandableText(
@@ -1562,9 +1884,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             onPressed: () {
               var uidpost = postDetails.uid;
 
-              print('$mypostid โพสของฉัน');
-              print('$checkpostidEvent โพสidอีเว้น');
-              print('$checksenderUid uidคนส่ง');
+              // print('$mypostid โพสของฉัน');
+              // print('$checkpostidEvent โพสidอีเว้น');
+              // print('$checksenderUid uidคนส่ง');
 
               if (uidpost == myuid) {
                 Navigator.pop(context);
@@ -1602,9 +1924,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             onPressed: () {
               uidpost = postDetails.uid;
 
-              print('$mypostid โพสของฉัน');
-              print('$checkpostidEvent โพสidอีเว้น');
-              print('$checksenderUid uidคนส่ง');
+              // print('$mypostid โพสของฉัน');
+              // print('$checkpostidEvent โพสidอีเว้น');
+              // print('$checksenderUid uidคนส่ง');
 
               if (uidpost == myuid) {
                 Navigator.pop(context);

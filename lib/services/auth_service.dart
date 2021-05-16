@@ -31,7 +31,7 @@ class AuthService {
     return _firebaseAuth.currentUser;
   }
 
-  //Email and Pasword Sign Up
+  //Email and Pasword Sign Up Firebase
   Future<String> createUserWithEmailAndPassword(
     email,
     password,
@@ -47,7 +47,7 @@ class AuthService {
     return currentUser.uid;
   }
 
-  //Email and Password Sign in
+  //Email and Password Sign in Firebase
   Future<String> signInWithEmailAndPassword(
     String email,
     String password,
@@ -82,8 +82,10 @@ final GoogleSignIn googleSignIn = GoogleSignIn(
 );
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-Future<String> signInWithGoogle() async {
-  print('signInWithGoogle');
+Future<String> signupWithGoogle() async {
+  /////////Login with Google
+
+  print('signupWithGoogle');
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -131,7 +133,7 @@ Future<String> signInWithGoogle() async {
       assert(token != null);
       print("Token : $token");
     });
-
+/////////setข้อมูลลงfirebase
     FirebaseFirestore.instance
         .collection("userData")
         .doc(user.email)
@@ -148,13 +150,13 @@ Future<String> signInWithGoogle() async {
           'profilePhoto': user.photoURL,
           'email': user.email,
           'birthDate': myTimeStamp,
-          'age': 'กรุณาเลือกเพศ',
-          'phone': 'กรุณาใส่เบอร์',
+          'age': 'กรุณาใส่อายุ',
+          'phone': 'Example XX XXXX-XXXX',
           // 'gender': getGender(),
         }).catchError((e) {
           print(e);
         });
-
+//set token ลงfirebase
         FirebaseFirestore.instance
             .collection("userData")
             .doc(user.email)
@@ -163,6 +165,26 @@ Future<String> signInWithGoogle() async {
             .set({
           'token': _token,
           'createdAt': FieldValue.serverTimestamp(),
+        }).catchError((e) {
+          print(e);
+        });
+//set interest
+        FirebaseFirestore.instance
+            .collection("interest")
+            .doc(user.email)
+            .collection('like')
+            .doc(user.email)
+            .set({
+          'Business': 0,
+          'Education': 0,
+          'Food': 0,
+          'Games': 0,
+          'Health': 0,
+          'Nature': 0,
+          'Other': 0,
+          'Shopping': 0,
+          'Sport': 0,
+          'Party': 0,
         }).catchError((e) {
           print(e);
         });
@@ -176,6 +198,7 @@ Future<String> signInWithGoogle() async {
   return null;
 }
 
+//////////////signInWithGoogle
 Future<String> signInWithGoogleV1() async {
   print('signInWithGoogle');
 
@@ -232,90 +255,6 @@ Future<String> signInWithGoogleV1() async {
         FirebaseFirestore.instance
             .collection("userData")
             .doc(user.email)
-            .collection("profile")
-            .doc(user.email)
-            .set({
-          'name': user.displayName,
-          'profilePhoto': user.photoURL,
-          'email': user.email,
-          'birthDate': '1/1/2000' as Timestamp,
-          'age': '0',
-          'gender': 'กรุณาเลือกเพศ',
-          // 'gender': getGender(),
-        }).catchError((e) {
-          print(e);
-        });
-
-        FirebaseFirestore.instance
-            .collection("userData")
-            .doc(user.email)
-            .collection('tokens')
-            .doc(_token)
-            .set({
-          'token': _token,
-          'createdAt': FieldValue.serverTimestamp(),
-        }).catchError((e) {
-          print(e);
-        });
-      }
-      // getCurrentUser();
-      print('signInWithGoogle succeeded: $user');
-    });
-    return '$user1';
-  }
-
-  return null;
-}
-
-Future<String> getGender() async {
-  print('getGender');
-  final headers = await googleSignIn.currentUser.authHeaders;
-  final r = await http.get(
-      "https://people.googleapis.com/v1/people/me?personFields=genders&key=",
-      headers: {"Authorization": headers["Authorization"]});
-
-  final response = jsonDecode(r.body);
-  return response["genders"][0]["formattedValue"];
-}
-
-Future<User> updateToken() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseMessaging _fcm = FirebaseMessaging();
-  final User user = _auth.currentUser;
-  String _token = "token";
-
-  _fcm.getToken().then((String token) {
-    _token = '$token';
-
-    // setState(() {
-    //   _token='$token';
-    // });
-    assert(token != null);
-    print("Token : $token");
-  });
-
-  if (user != null) {
-    FirebaseFirestore.instance
-        .collection("userData")
-        .doc(user.email)
-        .get()
-        .then((value) {
-      if (value.data != null) {
-        FirebaseFirestore.instance
-            .collection("userData")
-            .doc(user.email)
-            .collection('tokens')
-            .doc(_token)
-            .set({
-          'token': _token,
-          'createdAt': FieldValue.serverTimestamp(),
-        }).catchError((e) {
-          print(e);
-        });
-      } else {
-        FirebaseFirestore.instance
-            .collection("userData")
-            .doc(user.email)
             .collection('tokens')
             .doc(_token)
             .update({
@@ -325,12 +264,81 @@ Future<User> updateToken() async {
           print(e);
         });
       }
+
+      // getCurrentUser();
+      print('signInWithGoogle succeeded: $user');
     });
+
+    return '$user1';
   }
-  return user;
+
+  return null;
 }
 
-Future<User> getCurrentUser() async {
+// Future<String> getGender() async {
+//   print('getGender');
+//   final headers = await googleSignIn.currentUser.authHeaders;
+//   final r = await http.get(
+//       "https://people.googleapis.com/v1/people/me?personFields=genders&key=",
+//       headers: {"Authorization": headers["Authorization"]});
+
+//   final response = jsonDecode(r.body);
+//   return response["genders"][0]["formattedValue"];
+// }
+
+// Future<User> updateToken() async {
+//   final FirebaseAuth _auth = FirebaseAuth.instance;
+//   final FirebaseMessaging _fcm = FirebaseMessaging();
+//   final User user = _auth.currentUser;
+//   String _token = "token";
+
+//   _fcm.getToken().then((String token) {
+//     _token = '$token';
+
+//     // setState(() {
+//     //   _token='$token';
+//     // });
+//     assert(token != null);
+//     print("Token : $token");
+//   });
+
+//   if (user != null) {
+//     FirebaseFirestore.instance
+//         .collection("userData")
+//         .doc(user.email)
+//         .get()
+//         .then((value) {
+//       if (value.data != null) {
+//         FirebaseFirestore.instance
+//             .collection("userData")
+//             .doc(user.email)
+//             .collection('tokens')
+//             .doc(_token)
+//             .set({
+//           'token': _token,
+//           'createdAt': FieldValue.serverTimestamp(),
+//         }).catchError((e) {
+//           print(e);
+//         });
+//       } else {
+//         FirebaseFirestore.instance
+//             .collection("userData")
+//             .doc(user.email)
+//             .collection('tokens')
+//             .doc(_token)
+//             .update({
+//           'token': _token,
+//           'createdAt': FieldValue.serverTimestamp(),
+//         }).catchError((e) {
+//           print(e);
+//         });
+//       }
+//     });
+//   }
+//   return user;
+// }
+
+Future<User> updateToken() async {
   print('getCurrentUser');
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -387,6 +395,7 @@ Future<User> getCurrentUser() async {
   return null;
 }
 
+//signOutGoogle
 void signOutGoogle(_tokens) async {
   final uEmail = await AuthService().getCurrentEmail();
 
@@ -401,8 +410,8 @@ void signOutGoogle(_tokens) async {
   print("User Signed Out");
 }
 
-void signOutGoogleV1() async {
-  await googleSignIn.signOut();
-  await _auth.signOut();
-  print("User Signed Out");
-}
+// void signOutGoogleV1() async {
+//   await googleSignIn.signOut();
+//   await _auth.signOut();
+//   print("User Signed Out");
+// }

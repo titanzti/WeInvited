@@ -197,33 +197,33 @@ class _LoginState extends State<Login> {
                             _isButtonDisabled ? null : _submit,
                           ),
                     SizedBox(height: 20.0),
-                    SignInButton(
-                      Buttons.Google,
-                      text: "Sign up with Google",
-                      onPressed: () async {
-                        signInWithGoogle().then((result) {
-                          if (result != null) {
-                            Navigator.of(context).pushReplacement(
-                              CupertinoPageRoute(
-                                builder: (_) => InterestScreen(),
-                              ),
-                            );
-                          }
-                        });
-                      },
-                    ),
-                    SizedBox(height: 20.0),
+                    // SignInButton(
+                    //   Buttons.Google,
+                    //   text: "Sign up with Google",
+                    //   onPressed: () async {
+                    //     signInWithGoogle().then((result) {
+                    //       if (result != null) {
+                    //         Navigator.of(context).pushReplacement(
+                    //           CupertinoPageRoute(
+                    //             builder: (_) => InterestScreen(),
+                    //           ),
+                    //         );
+                    //       }
+                    //     });
+                    //   },
+                    // ),
+                    // SizedBox(height: 20.0),
                     SignInButton(
                       Buttons.Google,
                       text: "Sign in with Google",
                       onPressed: () async {
                         signInWithGoogleV1().then((result) {
                           if (result != null) {
-                            Navigator.of(context).pushReplacement(
-                              CupertinoPageRoute(
-                                builder: (_) => InterestScreen(),
-                              ),
-                            );
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) => MyApp()),
+                                (Route<dynamic> route) => false);
                           }
                         });
                       },
@@ -274,7 +274,7 @@ class _LoginState extends State<Login> {
 
         String uid = await auth.signInWithEmailAndPassword(_email, _password);
         // updateToken();
-        getCurrentUser();
+        updateToken();
         print("Signed in with $uid");
 
         // Navigator.of(context).pushReplacement(

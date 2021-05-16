@@ -53,12 +53,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   var start = "";
   var end = "(";
   var test;
-  // ignore: unused_field
-  List<String> _blockType = <String>['A', 'B', 'C', 'D', 'E'];
 
   int _selectedIndex = 0;
 
   String name;
+  String phone;
+
   String email;
 
   String _gender;
@@ -217,6 +217,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             null,
                             null,
                             0.00,
+                          ),
+                          Divider(),
+                          Text(
+                            "Phone",
+                            style: normalFont(MColors.textGrey, null),
+                          ),
+                          SizedBox(height: 5.0),
+                          primaryTextField(
+                            null,
+                            user.phone,
+                            "",
+                            (val) => phone = val,
+                            true,
+                            (String value) => value.isEmpty ? null : null,
+                            false,
+                            _autoValidate,
+                            false,
+                            TextInputType.text,
+                            null,
+                            null,
+                            0.50,
                           ),
                           Divider(),
                           Text(
@@ -708,10 +729,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       context: context,
       builder: (context) => Container(
         margin: EdgeInsets.only(
-          bottom: 10.0,
+          bottom: 25.0,
           left: 10.0,
           right: 10.0,
-          top: 5.0,
+          top: 10.0,
         ),
         padding: EdgeInsets.all(15.0),
         decoration: BoxDecoration(
@@ -730,7 +751,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 "Change profile photo",
                 style: boldFont(MColors.textDark, 18.0),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: 20.0),
               GestureDetector(
                 onTap: () {
                   _pickImage(ImageSource.camera)
@@ -772,6 +793,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   saveImage(imageFile) {
+    print('saveImage');
     showModalBottomSheet(
       isDismissible: false,
       enableDrag: false,
@@ -812,17 +834,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 <Widget>[
                   FlatButton(
                     onPressed: () async {
+                      print('กด');
+                      _showLoadingDialog();
+
                       await checkInternetConnectivity().then((value) {
                         value == true
                             ? () async {
-                                _showLoadingDialog();
                                 await updateProfilePhoto(imageFile)
                                     .then((value) {
-                                  Navigator.pop(context);
-                                  // Navigator.of(context, rootNavigator: true)
-                                  //     .pop();
-                                  // Navigator.of(context).pop();
-                                  // Navigator.of(context).pop(true);
+                                  // Navigator.pop(context);
+
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop(true);
                                 });
                               }()
                             : () {
@@ -835,6 +860,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 );
                               }();
                       });
+                      // Navigator.of(context).pop();
                     },
                     child: Text(
                       "Save",
@@ -846,6 +872,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               SizedBox(height: 10.0),
               primaryContainer(
                 Container(
+                  height: MediaQuery.of(context).size.height * .50,
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
                     children: [

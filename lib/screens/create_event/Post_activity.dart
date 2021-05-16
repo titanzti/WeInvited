@@ -120,16 +120,16 @@ class _PostActivityState extends State<PostActivity> {
     checkInternetConnectivity().then((value) => {
           value == true
               ? () {
-                  PostNotifier postNotifier =
-                      Provider.of<PostNotifier>(context, listen: false);
-                  getPosts(postNotifier);
-                  file = widget.file;
-                  if (postNotifier.currentPost != null) {
-                    _currentPost = postNotifier.currentPost;
-                  } else {
-                    _currentPost = new Post();
-                  }
-                  _imageUrl = _currentPost.image;
+                  // PostNotifier postNotifier =
+                  //     Provider.of<PostNotifier>(context, listen: false);
+                  // getPosts(postNotifier);
+                  // file = widget.file;
+                  // if (postNotifier.currentPost != null) {
+                  //   _currentPost = postNotifier.currentPost;
+                  // } else {
+                  //   _currentPost = Post();
+                  // }
+                  // _imageUrl = _currentPost.image;
 
                   UserDataProfileNotifier profileNotifier =
                       Provider.of<UserDataProfileNotifier>(context,
@@ -137,12 +137,6 @@ class _PostActivityState extends State<PostActivity> {
                   getProfile(profileNotifier);
 
                   file = widget.file;
-                  if (postNotifier.currentPost != null) {
-                    _currentPost = postNotifier.currentPost;
-                  } else {
-                    _currentPost = new Post();
-                  }
-                  _imageUrl = _currentPost.image;
                 }()
               : showNoInternetSnack(_scaffoldKey)
         });
@@ -272,7 +266,7 @@ class _PostActivityState extends State<PostActivity> {
       children: [
         TextFormField(
           decoration: InputDecoration(labelText: 'Title'),
-          // initialValue: _currentPost.name,
+          initialValue: _currentPost.name,
           keyboardType: TextInputType.text,
           style: TextStyle(fontSize: 15),
           validator: (String value) {
@@ -309,6 +303,7 @@ class _PostActivityState extends State<PostActivity> {
             onChanged: (selectedCategory) {
               setState(() {
                 selectedcategoryType = selectedCategory;
+                print('selectedcategoryType$selectedcategoryType');
               });
             },
             onSaved: (String value) {
@@ -590,6 +585,35 @@ class _PostActivityState extends State<PostActivity> {
     );
   }
 
+  Widget _buildAgeUIV1() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Age', hintText: '16-30'),
+          // initialValue: _currentPost.name,
+          keyboardType: TextInputType.text,
+          style: TextStyle(fontSize: 15),
+          validator: (String value) {
+            if (value.isEmpty) {
+              return 'Please enter a Age';
+            }
+            if (int.parse(value) > 90) {
+              return 'อายุไม่เกิน90';
+            }
+
+            return null;
+          },
+
+          onSaved: (String value) {
+            _currentPost.agerange = value;
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildAgeUI() {
     // RangeValues _currentRangeValues = const RangeValues(1, 60);
 
@@ -649,12 +673,12 @@ class _PostActivityState extends State<PostActivity> {
           // ),
           child: ListTile(
               title: TextFormField(
-                  validator: (String value) {
-                    if (value.isEmpty) {
-                      return 'Please enter event location.';
-                    }
-                    return null;
-                  },
+                  // validator: (String value) {
+                  //   if (value.isEmpty) {
+                  //     return 'Please enter event location.';
+                  //   }
+                  //   return null;
+                  // },
                   style: TextStyle(fontSize: 15),
                   controller: _textlocController,
                   decoration: InputDecoration(
@@ -684,10 +708,12 @@ class _PostActivityState extends State<PostActivity> {
                     );
                     // This will change the text displayed in the TextField
                     if (result != null) {
-                      final placeDetails = await PlaceApiProvider(sessionToken)
-                          .getPlaceDetailFromId(result.placeId);
+                      // final placeDetails = await PlaceApiProvider(sessionToken)
+                      //     .getPlaceDetailFromId(result.placeId);
+                      // print(placeDetails);
                       setState(() {
                         _textlocController.text = result.description;
+                        print(result.description);
                         // _streetNumber = placeDetails.streetNumber;
                         // _street = placeDetails.street;
                         // _city = placeDetails.city;
@@ -725,6 +751,7 @@ class _PostActivityState extends State<PostActivity> {
     if (_imageFile == null) {
       return showDialog<void>(
         context: context,
+
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
@@ -742,8 +769,68 @@ class _PostActivityState extends State<PostActivity> {
       );
       /*ถ้าไม่ จะอัพโหลด */
     } else {
-      uploadFoodAndImage(
-          _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+      switch (selectedcategoryType) {
+        case 'Health':
+          uploadFoodAndImageHealth(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Business':
+          uploadFoodAndImageBusiness(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Education':
+          uploadFoodAndImageEducation(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Food':
+          uploadFoodAndImageFood(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Games':
+          uploadpostAndImageGames(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Nature':
+          uploadpostAndImageNature(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Other':
+          uploadpostAndImageOther(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Party':
+          uploadpostAndImageParty(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Shopping':
+          uploadpostAndImageShopping(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+        case 'Sport':
+          uploadpostAndImageSport(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          uploadFoodAndImageALL(
+              _currentPost, widget.isUpdating, _imageFile, _onPostUploaded);
+          break;
+      }
     }
 
     _formKey.currentState.save();
@@ -753,7 +840,6 @@ class _PostActivityState extends State<PostActivity> {
     });
 
     print('form saved');
-
     print("name: ${_currentPost.name}");
     print("category: ${_currentPost.place}");
     print("_imageFile ${_imageFile.toString()}");
@@ -772,8 +858,8 @@ class _PostActivityState extends State<PostActivity> {
     Navigator.pop(context);
   }
 
-  uploadFoodAndImage(
-      Post post, bool isUpdating, File localFile, Function foodUploaded) async {
+  uploadFoodAndImageHealth(Post post, bool isUpdating, File localFile,
+      Function foodUploadedHealth) async {
     if (localFile != null) {
       print("uploading image");
 
@@ -796,20 +882,22 @@ class _PostActivityState extends State<PostActivity> {
 
       String url = await firebaseStorageRef.getDownloadURL();
       print("download url: $url");
-      _uploadFood(post, isUpdating, foodUploaded, imageUrl: url);
+      _uploadFoodHealth(post, isUpdating, foodUploadedHealth, imageUrl: url);
     } else {
       print('...skipping image upload');
       // _uploadFood(post, isUpdating, foodUploaded);
     }
   }
 
-  _uploadFood(Post post, bool isUpdating, Function foodUploaded,
+  _uploadFoodHealth(Post post, bool isUpdating, Function foodUploadedHealth,
       {String imageUrl}) async {
     final uEmail = await AuthService().getCurrentEmail();
     final uid = await AuthService().getCurrentUID();
 
-    CollectionReference foodRef =
-        await FirebaseFirestore.instance.collection('Posts');
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Health')
+        .collection('PostsList');
     // .doc(uid)
     // .collection("PostsList");
     final name = await AuthService().getCurrentUser();
@@ -825,7 +913,7 @@ class _PostActivityState extends State<PostActivity> {
 
       await foodRef.doc(post.postid).update(post.toMap());
 
-      foodUploaded(post);
+      foodUploadedHealth(post);
       print('updated food with id: ${post.postid}');
     } else {
       post.createdAt = Timestamp.now();
@@ -849,7 +937,841 @@ class _PostActivityState extends State<PostActivity> {
 
       await documentRef.set(post.toMap());
 
-      foodUploaded(post);
+      foodUploadedHealth(post);
+    }
+  }
+
+  uploadFoodAndImageBusiness(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodBusiness(post, isUpdating, postUploadedBusiness,
+          imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodBusiness(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Business')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadFoodAndImageEducation(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodEducation(post, isUpdating, postUploadedBusiness,
+          imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodEducation(
+      Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Education')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadFoodAndImageFood(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodFood(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodFood(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Food')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageGames(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodGame(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodGame(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Game')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageNature(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodNature(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodNature(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Nature')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageOther(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodOther(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodOther(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Other')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageParty(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodParty(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodParty(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Party')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageShopping(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodShopping(post, isUpdating, postUploadedBusiness,
+          imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodShopping(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Shopping')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadpostAndImageSport(Post post, bool isUpdating, File localFile,
+      Function postUploadedBusiness) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodSport(post, isUpdating, postUploadedBusiness, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodSport(Post post, bool isUpdating, Function postUploadedBusiness,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('Sport')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      postUploadedBusiness(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      postUploadedBusiness(post);
+    }
+  }
+
+  uploadFoodAndImageALL(Post post, bool isUpdating, File localFile,
+      Function foodUploadedHealth) async {
+    if (localFile != null) {
+      print("uploading image");
+
+      var fileExtension = path.extension(localFile.path);
+      print(fileExtension);
+
+      var uuid = Uuid().v4();
+
+      final StorageReference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/images/$uuid$fileExtension');
+
+      await firebaseStorageRef
+          .putFile(localFile)
+          .onComplete
+          .catchError((onError) {
+        print(onError);
+        return false;
+      });
+
+      String url = await firebaseStorageRef.getDownloadURL();
+      print("download url: $url");
+      _uploadFoodALL(post, isUpdating, foodUploadedHealth, imageUrl: url);
+    } else {
+      print('...skipping image upload');
+      // _uploadFood(post, isUpdating, foodUploaded);
+    }
+  }
+
+  _uploadFoodALL(Post post, bool isUpdating, Function foodUploadedHealth,
+      {String imageUrl}) async {
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+
+    CollectionReference foodRef = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc('ALL')
+        .collection('PostsList');
+    // .doc(uid)
+    // .collection("PostsList");
+    final name = await AuthService().getCurrentUser();
+    final User user = await auth.currentUser;
+    final username = user.displayName;
+
+    if (imageUrl != null) {
+      post.image = imageUrl;
+    }
+
+    if (isUpdating) {
+      post.updatedAt = Timestamp.now();
+
+      await foodRef.doc(post.postid).update(post.toMap());
+
+      foodUploadedHealth(post);
+      print('updated food with id: ${post.postid}');
+    } else {
+      post.createdAt = Timestamp.now();
+      post.emailuser = uEmail;
+      post.uid = uid;
+      post.postbyname = widget.userData.name;
+      post.postbyimage = widget.userData.profilePhoto;
+      post.likes = 0;
+      DocumentReference documentRef = await foodRef.add(post.toMap());
+
+      post.postid = documentRef.id;
+
+      // await FirebaseFirestore.instance
+      //     .collection("Posts")
+      //     .doc(post.postid)
+      //     .collection('likes')
+      //     .doc(uEmail)
+      //     .set({'likes': 0});
+
+      print('uploaded food successfully: ${post.toString()}');
+
+      await documentRef.set(post.toMap());
+
+      foodUploadedHealth(post);
     }
   }
 
@@ -1002,7 +1924,7 @@ class _PostActivityState extends State<PostActivity> {
                   Divider(
                     height: 2,
                   ),
-                  _buildAgeUI(),
+                  _buildAgeUIV1(),
                   Divider(
                     height: 2,
                   ),
