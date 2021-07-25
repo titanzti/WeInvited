@@ -138,7 +138,7 @@ class _InterestScreenState extends State<InterestScreen> {
                                       choiceItems:
                                           C2Choice.listFrom<String, String>(
                                         source: options,
-                                        value: (i, v) => v.toLowerCase(),
+                                        value: (i, v) => v,
                                         label: (i, v) => v,
                                         tooltip: (i, v) => v,
                                       ),

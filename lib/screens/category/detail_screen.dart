@@ -95,7 +95,15 @@ class _DetailScreenState extends State<DetailScreen>
     final format3 = new DateFormat(' h:mm ');
     return Scaffold(
       appBar: primaryAppBar(
-        null,
+        IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         Text(
           widget._title,
           textAlign: TextAlign.left,

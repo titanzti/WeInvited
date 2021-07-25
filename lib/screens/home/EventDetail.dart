@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frino_icons/frino_icons.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -16,6 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:we_invited/main.dart';
 import 'package:we_invited/models/joinevent.dart';
 import 'package:we_invited/models/post.dart';
+import 'package:we_invited/models/Comment.dart';
+import 'package:we_invited/utils/utils.dart';
 import 'package:we_invited/models/user.dart';
 import 'package:we_invited/notifier/join_notifier.dart';
 import 'package:we_invited/notifier/post_notifier.dart';
@@ -33,6 +36,8 @@ import 'package:we_invited/utils/internetConnectivity.dart';
 import 'package:we_invited/widgets/allWidgets.dart';
 import 'package:we_invited/widgets/ui_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:random_string/random_string.dart';
+import 'dart:math' show Random;
 
 class PostDetailsV1 extends StatefulWidget {
   final Post postDetails;
@@ -56,6 +61,8 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   double opacity1 = 0.0;
   double opacity2 = 0.0;
   double opacity3 = 0.0;
+  bool _autoValidate = false;
+
   var str;
   int totallike;
   bool liked = false;
@@ -80,7 +87,12 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   var uidpost;
   var mycategory;
   var otheremail;
-
+  var autoId;
+  var mesgController = new TextEditingController();
+  Future getDataFuture;
+  String mesg;
+  List<Comment> _commentList = [];
+var statuscheck;
   bool checkissendrequest = false;
   String toggleJoin;
   bool visibilitybutt = false;
@@ -96,10 +108,71 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   bool isFavorite = false;
   final format1 = DateFormat('d/M/yyyy');
   final now = DateTime.now();
-
+var checkstatus;
   bool isExpired;
   String _token = "token";
   DateTime dateexp = DateTime.now();
+
+  DocumentReference documentRef;
+
+  static const AUTO_ID_ALPHABET =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  static const AUTO_ID_LENGTH = 20;
+  String _getAutoId() {
+    final buffer = StringBuffer();
+    final random = Random.secure();
+
+    final maxRandom = AUTO_ID_ALPHABET.length;
+
+    for (int i = 0; i < AUTO_ID_LENGTH; i++) {
+      buffer.write(AUTO_ID_ALPHABET[random.nextInt(maxRandom)]);
+    }
+    return buffer.toString();
+  }
+  
+
+  sendcomment(String mesg, autoId) async {
+    print('sendcomment');
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
+        .doc(postDetails.postid)
+        .collection("Comment")
+        .doc('$autoId')
+        .set({
+      'commentid': autoId,
+      'commentbyname': widget.userData.name,
+      'createdAt': Timestamp.now(),
+      'mesg': mesg,
+      'commentbyprofilePhoto': widget.userData.profilePhoto,
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+
+  Future fetchAndSetList() async {
+    /////getcomment
+
+    print('fetchAndSetList');
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
+        .doc(postDetails.postid)
+        .collection("Comment")
+        .orderBy("createdAt", descending: true)
+        // .orderBy("likes", descending: true)
+        .get();
+
+    snapshot.docs.forEach((document) {
+      Comment comments = Comment.fromMap(document.data());
+      _commentList.add(comments);
+      print('_commentList${_commentList.length}');
+    });
+  }
 
 /*ฟังชั่นกดไลท์ */
   Future likepost(int totallike, String postId) async {
@@ -196,9 +269,61 @@ class _PostDetailsV1State extends State<PostDetailsV1>
       print(onError);
     });
   }
+  
 
+   getstatus(Post postDetails)async {
+    print("getstatus");
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+    print('getstatusuid${postDetails.uid}');
+
+     print("getinterest");
+      FirebaseFirestore.instance
+        .collection("JoinEvent")
+        .doc(postDetails.uid)
+        .collection("JoinEventList")
+        // .where('postis', isEqualTo: postDetails.postid)
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((value) {
+         statuscheck = value.get('status');
+       print('statuscheck$statuscheck');
+       
+      
+       
+       
+        
+      });
+    }).catchError((onError) {
+      print(onError);
+    });
+  }
+
+ Future<Null> _handleRefresh() async {
+    new Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      _commentList.clear();
+    });
+   QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
+        .doc(postDetails.postid)
+        .collection("Comment")
+        .orderBy("createdAt", descending: true)
+        // .orderBy("likes", descending: true)
+        .get();
+
+    snapshot.docs.forEach((document) {
+      Comment comments = Comment.fromMap(document.data());
+      _commentList.add(comments);
+      print('_commentList${_commentList.length}');
+    });
+  }
   @override
   void initState() {
+    print('initState');
+
     controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     bodyScrollAnimationController =
@@ -227,45 +352,23 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     checkInternetConnectivity().then((value) => {
           value == true
               ? () {
-                  getDataFromJoinEvent();
+                  // getDataFromJoinEvent();
                   // checkData();
-                  //
+                                      getstatus(postDetails);
+
                   setinterest();
+                  uidpost= postDetails.uid;
 
                   visibilitybutt = false;
                   open = conte + 1;
 
-                  // print('mycategory=>>>$mycategory');
-                  // switch (mycategory) {
-                  //   case 'Party':
-                  //     FirebaseFirestore.instance
-                  //         .collection("interest")
-                  //         .doc(widget.userData.email)
-                  //         .collection('like')
-                  //         .doc(widget.userData.email)
-                  //         .update({
-                  //       'Party': open + 1,
-                  //     }).catchError((e) {
-                  //       print(e);
-                  //     });
-                  //     print('Party1');
-                  //     break;
-                  //   // case PI:
-                  //   //   // do something else
-                  //   //   break;
-                  // }
                   mycategory = postDetails.category;
-                  print('mycategory$mycategory');
-
-                  print('open=>>>$open');
-                  // print(postDetails.category);
-
+          
                   JoinNotifier joinNotifier =
                       Provider.of<JoinNotifier>(context, listen: false);
                   getEvenReqPosts(joinNotifier);
 
                   mypostuid = postDetails.uid;
-                  // mypostid = postDetails.postid;
 
                   getCloudFirestoreJoinEvent();
 
@@ -283,7 +386,6 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                   startIndex = str.indexOf(start);
                   endIndex = str.indexOf(end, startIndex + start.length);
 
-                  print(str.substring(startIndex + start.length, endIndex));
 
                   otheremail = postDetails.emailuser;
 
@@ -306,6 +408,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                   // Provider.of<BannerAdNotifier>(context, listen: false);
                   // getBannerAds(bannerAdNotifier);
                   getlikes(mypostid);
+                  fetchAndSetList();
 
                   // checkIfSentRequest();
                 }()
@@ -314,6 +417,30 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     super.initState();
   }
 
+
+  deletcomment(String postid,String commentid) async {
+    print('deletmypost');
+    await FirebaseFirestore.instance
+        .collection('Posts').doc('ALL').collection('PostsList').doc(postid).collection("Comment")
+        // .where('requestpostid', isEqualTo: mypostid)
+        .where('commentid', isEqualTo: commentid)
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+              querySnapshot.docs.forEach((doc) {
+                if (doc.exists) {
+                  doc.reference.delete();
+                  setState(() {
+                    visibilitybutt = false;
+                    // print(visibilitybutt.toString());
+                  });
+                }
+                   if (!doc.exists) {
+                print('deletmypost No successfully');
+                }
+              })
+            });
+    print('deletmypost successfully');
+  }
   @override
   void dispose() {
     controller.dispose();
@@ -321,6 +448,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
     super.dispose();
   }
+  
 
   Future setinterest() async {
     print("getinterest");
@@ -540,6 +668,10 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
   @override
   Widget build(BuildContext context) {
+    autoId = _getAutoId();
+    // fetchAndSetList();
+
+
     isExpired = dateexp.isBefore(postDetails.entdateTime.toDate());
     // print('isExpired$isExpired');
     mypostid = postDetails.postid;
@@ -568,9 +700,11 @@ class _PostDetailsV1State extends State<PostDetailsV1>
 
     totallike = postDetails.likes;
 
-    print('totallike=>>>>>$totallike');
+    // print('totallike=>>>>>$totallike');
     if (isExpired == false) {
-      expireeven();
+      // return
+
+      // expireeven();
     }
 
     var postuid = postDetails.postid;
@@ -638,11 +772,104 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                           ),
                           UIHelper.verticalSpace(24),
                           buildEventLocation(),
-                          Divider(
-                            thickness: 1,
-                            color: Colors.grey[200],
+                          SizedBox(
+                            height: 10,
                           ),
-                          UIHelper.verticalSpace(124),
+//=======================================comment=========================================//
+                          Text("comment",style: TextStyle(fontSize: 18),),
+                          TextFormField(
+                            controller: mesgController,
+                            decoration:
+                                InputDecoration(labelText: 'ENTER Comment'),
+                            // initialValue: _currentPost.name,
+                            keyboardType: TextInputType.text,
+                            style: TextStyle(fontSize: 15),
+                            validator: (String value) {
+                              if (value.isEmpty) {
+                                return 'Please enter a title';
+                              }
+                              return null;
+                            },
+                            onSaved: (String value) {
+                              mesg = value;
+                            },
+                            onChanged: (String value) {
+                              mesg = value;
+                              print('mesg$mesg');
+                            },
+                          ),
+                          //  mesgController.text=="" ? Container():
+                      checkissendrequest != true||  statuscheck=="request"
+                              ? Container()
+                              : Align(
+                                  alignment: Alignment.topRight,
+                                  child: RaisedButton(
+                                    child: Text(
+                                      "Send",
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                    onPressed: () {
+                                      sendcomment(mesg, autoId);
+                                      setState(() {
+                                        mesgController.clear();
+                                        _handleRefresh();
+                                    
+                                      });
+                                      print('กด');
+                                    },
+                                    color: Colors.red,
+                                    textColor: Colors.white,
+                                    padding: EdgeInsets.all(8.0),
+                                    splashColor: Colors.grey,
+                                  ),
+                                ),
+
+                          Container(
+                            width: 300,
+                            height: 300,
+                            child: FutureBuilder(
+                              future: Future.wait([
+                                getDataFuture,
+                              ]),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
+                                return ListView.builder(
+                                  itemCount: _commentList.length,
+                                  // padding: EdgeInsets.all(10),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    var datalist = _commentList[index];
+                                    return ListTile(
+                                      title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(datalist.commentbyname,style: TextStyle(fontSize: 18),),
+                                        ],
+                                      ),
+                                      subtitle: Column(
+                                         crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                        Text(datalist.mesg,style: TextStyle(fontSize: 16),),
+                          Text(Utils.readTimestamp(datalist.createdAt.millisecondsSinceEpoch)),
+                                      ],),
+                                      leading: CircleAvatar(
+                                        child: Container(
+                                          width: 60,
+                                          height: 60,
+                                          child: Image.network(
+                                            datalist.commentbyprofilePhoto,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
                           //...List.generate(10, (index) => ListTile(title: Text("Dummy content"))).toList(),
                         ],
                       ),
@@ -684,67 +911,44 @@ class _PostDetailsV1State extends State<PostDetailsV1>
   }
 
   expireeven() {
-    Dialogs.materialDialog(
-        // barrierDismissible: false,
-        color: Colors.white,
-        // msg: 'Congratulations, you won 500 points',
-        title: 'Expire',
-        // animation: 'assets/cong_example.json',
-        context: context,
-        actions: [
-          IconsButton(
-            onPressed: () async {
-              print('กดออก');
-              Navigator.pop(context);
-              // Navigator.of(context).pop();
-
-              // WidgetsBinding.instance.addPostFrameCallback((_) {
-              //   Navigator.pushReplacement(
-              //       context, MaterialPageRoute(builder: (_) => MyApp()));
-              // });
-
-              // Navigator.pushAndRemoveUntil(
-              //     context,
-              //     MaterialPageRoute(builder: (BuildContext context) => MyApp()),
-              //     (Route<dynamic> route) => false);
-            },
-            text: 'Close',
-            // iconData: Icons.done,
-            color: Colors.blue,
-            textStyle: TextStyle(color: Colors.white),
-            iconColor: Colors.white,
+    Alert(
+      context: context,
+      // type: AlertType.info,
+      title: "ส่งคำขอ",
+      content: Column(
+        children: <Widget>[
+          // Text("ส่งคำขอ",
+          //   style: TextStyle(
+          //       fontSize: 20,
+          //       color: Colors.black
+          //   ),
+          // ),
+          Text(
+            "let the Hoster get to know you more!.",
+            style: TextStyle(fontSize: 12, color: Colors.blueGrey),
           ),
-        ]);
+          SizedBox(
+            height: 25,
+          ),
+          Row(
+            children: <Widget>[],
+          ),
+        ],
+      ),
+      buttons: [
+        DialogButton(
+          child: Text(
+            'Join',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          // color: Color.fromRGBO(0, 179, 134, 1.0),
+        ),
+      ],
+    ).show();
   }
 
   AlertJoinScreen() {
-    // Dialogs.materialDialog(
-    //     color: Colors.white,
-    //     // msg: 'Congratulations, you won 500 points',
-    //     title: 'ส่งคำขอ',
-    //     animation: 'assets/cong_example.json',
-    //     context: context,
-    //     actions: [
-    //       IconsButton(
-    //         onPressed: () async {
-    //           print('$mypostid โพสของฉัน');
-    //           print('$checkpostidEvent โพสidอีเว้น');
-    //           print('$checksenderUid uidคนส่ง');
-
-    //           //  if (mypostid!=checkpostidEvent) {
-    //           //
-    //           // }
-    //           eventreq(joinEvent);
-    //           Navigator.pop(context);
-    //         },
-    //         text: 'Join',
-    //         iconData: Icons.done,
-    //         color: Colors.blue,
-    //         textStyle: TextStyle(color: Colors.white),
-    //         iconColor: Colors.white,
-    //       ),
-    //     ]);
-
     Alert(
       context: context,
       // type: AlertType.info,
@@ -850,6 +1054,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             //
             // }
             eventreq(joinEvent);
+            sendmyeventreq(joinEvent);
             Navigator.pop(context);
           },
           color: Color.fromRGBO(0, 179, 134, 1.0),
@@ -994,6 +1199,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () async {
+            
             deletmypost();
             Navigator.pop(context);
           },
@@ -1014,7 +1220,7 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     //   });
     // }
     await FirebaseFirestore.instance
-        .collection('Posts')
+        .collection('Posts').doc('ALL').collection('PostsList')
         // .where('requestpostid', isEqualTo: mypostid)
         .where('postid', isEqualTo: postDetails.postid)
         .get()
@@ -1026,6 +1232,9 @@ class _PostDetailsV1State extends State<PostDetailsV1>
                     visibilitybutt = false;
                     // print(visibilitybutt.toString());
                   });
+                }
+                   if (!doc.exists) {
+                print('deletmypost No successfully');
                 }
               })
             });
@@ -1177,11 +1386,66 @@ class _PostDetailsV1State extends State<PostDetailsV1>
     joinevent.senderEmail = widget.userData.email;
     joinevent.status = 'request';
     joinEvent.receiveremail = postDetails.emailuser;
+    joinEvent.imageUrl = postDetails.image;
 
-    DocumentReference documentRef = await joineventref.add(joinevent.toMap());
+    documentRef = await joineventref.add(joinevent.toMap());
     joinevent.joinid = documentRef.id;
 
     await documentRef.set(joinevent.toMap()).then((result) {
+      setState(() {
+        // _changed(false,joinEvent);
+        visibilitybutt = true;
+      });
+
+      print("eventreq successfully");
+      // print(visibilitybutt.toString());
+    }).catchError((onError) {
+      print("onError");
+    });
+
+    setState(() {
+      // _changed(false,joinEvent);
+
+      visibilitybutt = true;
+    });
+
+    print('JoinEvent  successfully: ${joinevent.toString()}');
+  }
+
+  /*ส่งrequest */
+  sendmyeventreq(JoinEvent joinevent) async {
+    final uid = await AuthService().getCurrentUID();
+    final uEmail = await AuthService().getCurrentEmail();
+    // final joineventref = FirebaseFirestore.instance.collection('JoinEvent');
+
+    var postid = postDetails.postid;
+    var postbyuid = postDetails.uid;
+
+    CollectionReference sendjoineventref = FirebaseFirestore.instance
+        .collection("MyJoinEvent")
+        .doc(uid)
+        .collection('JoinEventList');
+
+    joinevent.type = "sent";
+    joinevent.ownerID = postDetails.uid;
+    joinevent.ownerName = postDetails.postbyname;
+    joinevent.title = postDetails.name;
+    joinevent.postid = postid;
+    joinevent.createdAt = Timestamp.now();
+    joinevent.senderAvatar = widget.userData.profilePhoto;
+    joinevent.senderName = widget.userData.name;
+    joinevent.senderUid = myuid;
+    joinevent.receiverUidjoin = postDetails.uid;
+    joinevent.requestpostid = postDetails.postid;
+    joinevent.senderEmail = widget.userData.email;
+    joinevent.status = 'request';
+    joinEvent.receiveremail = postDetails.emailuser;
+
+    DocumentReference senfdocumentRef =
+        await sendjoineventref.add(joinevent.toMap());
+    joinevent.joinid = documentRef.id;
+
+    await senfdocumentRef.set(joinevent.toMap()).then((result) {
       setState(() {
         // _changed(false,joinEvent);
         visibilitybutt = true;
@@ -1460,11 +1724,23 @@ class _PostDetailsV1State extends State<PostDetailsV1>
       case 'Report':
         test3();
         break;
+        
       case 'Delete':
+          if (uidpost == myuid) {
         deletAlert();
+              } 
+               if (uidpost != myuid) {
+                Navigator.pop(context);
+              } 
+       
         break;
       case 'Edit':
+       if (uidpost == myuid) {
         editAlert();
+              } 
+               if (uidpost != myuid) {
+                Navigator.pop(context);
+              } 
         break;
     }
   }

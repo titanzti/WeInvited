@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:we_invited/models/Comment.dart';
 import 'package:we_invited/models/bannerAds.dart';
 import 'package:we_invited/models/post.dart';
 import 'package:we_invited/models/postrecom.dart';
@@ -7,6 +8,7 @@ import 'package:we_invited/models/postrecom2.dart';
 import 'package:we_invited/models/postrecom3.dart';
 import 'package:we_invited/models/postrecom4.dart';
 import 'package:we_invited/notifier/bannerAd_notifier.dart';
+import 'package:we_invited/notifier/comment_notifier.dart';
 import 'package:we_invited/notifier/postRecom_notifier.dart';
 import 'package:we_invited/notifier/postRecom1_notifier.dart';
 import 'package:we_invited/notifier/postRecom2_notifier.dart';
@@ -30,6 +32,26 @@ getPosts(PostNotifier postNotifier) async {
   });
 
   postNotifier.postList = _postsList;
+}
+
+getComment(CommentNotifier commentNotifier,String commentid) async {
+
+        
+  QuerySnapshot snapshot = await FirebaseFirestore.instance
+     .doc("ALL")
+        .collection("PostsList")
+        .doc(commentid)
+      .collection("Comment")
+      // .orderBy("likes", descending: true)
+      .get();
+  List<Comment> _commentList = [];
+
+  snapshot.docs.forEach((document) {
+    Comment comments = Comment.fromMap(document.data());
+    _commentList.add(comments);
+  });
+
+  commentNotifier.commentList = _commentList;
 }
 
 ///getPosts ที่likeเยอะอยู่ต้นๆ
@@ -67,13 +89,13 @@ getPostsRecom(
 // ,totalcategoryShopping
 // ,totalcategorySport
     ) async {
-  print('totalcategoryFood>totalcategoryHealth');
+  print('interestgetPostsRecom>$interest');
   QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection("Posts")
       .doc('$interest')
       .collection("PostsList")
       .limit(1)
-      .orderBy("likes", descending: true)
+      // .orderBy("likes", descending: true)
 
       // .doc('Health').collection("PostsList")
       //  .where('category',isEqualTo: 'Health')
@@ -226,7 +248,7 @@ getOtherPosts(PostNotifier postNotifier, myuid) async {
 getPostswithcategory(PostNotifier postNotifier, _title) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection("Posts")
-      .doc(_title)
+      .doc('$_title')
       .collection('PostsList')
       // .where('category', isEqualTo: _title)
       // .orderBy("createdAt", descending: true)

@@ -44,6 +44,7 @@ class _PostActivityState extends State<PostActivity> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   var _textlocController = new TextEditingController();
+
   String selectDateTime;
 
   Post _currentPost = Post();
@@ -57,6 +58,8 @@ class _PostActivityState extends State<PostActivity> {
   String selectedcategoryType;
 
   String selectedgenderType;
+  String selectedAgeLang;
+
   String _imageUrl;
   File _imageFile;
   double _kPickerSheetHeight = 216.0;
@@ -92,9 +95,17 @@ class _PostActivityState extends State<PostActivity> {
     'Sport',
   ];
   final List<String> _genderType = <String>[
-    'ผู้ชาย',
-    'ผู้หญิง',
-    'ผู้ชาย & ผู้หญิง',
+    'Male',
+    'Female',
+    'Male and Female',
+    'Other',
+  ];
+  final List<String> _agelang = <String>[
+    '13-20ปี',
+    '21-30ปี',
+    '31-40ปี',
+    '41-50ปี',
+    '60ปีขึ้นไป',
   ];
   RangeValues _currentRangeValues = const RangeValues(12, 60);
 
@@ -283,6 +294,30 @@ class _PostActivityState extends State<PostActivity> {
     );
   }
 
+  Widget _buildLoc1Field() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Locationd'),
+          initialValue: _currentPost.place,
+          keyboardType: TextInputType.text,
+          style: TextStyle(fontSize: 15),
+          validator: (String value) {
+            if (value.isEmpty) {
+              return 'Please enter a locationd';
+            }
+            return null;
+          },
+          onSaved: (String value) {
+            _currentPost.place = value;
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildcatField() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -362,6 +397,51 @@ class _PostActivityState extends State<PostActivity> {
             isExpanded: false,
             hint: Text(
               'Select the gender you want to meet',
+              style: TextStyle(fontSize: 15),
+
+              // style:
+              // TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildagelangField() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          child: DropdownButtonFormField(
+            // value: userData.gender,
+            items: _agelang
+                .map((value) => DropdownMenuItem(
+                      child: Text(
+                        value,
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      value: value,
+                    ))
+                .toList(),
+            onChanged: (selectedGender) {
+              setState(() {
+                selectedAgeLang = selectedGender;
+              });
+            },
+            onSaved: (String value) {
+              _currentPost.agerange = value;
+            },
+            validator: (String value) {
+              if (value == null) {
+                return 'Please select a Age ';
+              }
+              return null;
+            },
+            isExpanded: false,
+            hint: Text(
+              'Select the Age you want to meet',
               style: TextStyle(fontSize: 15),
 
               // style:
@@ -1924,7 +2004,7 @@ class _PostActivityState extends State<PostActivity> {
                   Divider(
                     height: 2,
                   ),
-                  _buildAgeUIV1(),
+                  _buildagelangField(),
                   Divider(
                     height: 2,
                   ),
@@ -1938,7 +2018,7 @@ class _PostActivityState extends State<PostActivity> {
                     height: 2,
                   ),
                   SizedBox(height: 10.0),
-                  _buildLocField(),
+                  _buildLoc1Field(),
                   Divider(
                     height: 2,
                   ),

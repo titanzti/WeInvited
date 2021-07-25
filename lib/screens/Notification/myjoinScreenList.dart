@@ -13,79 +13,91 @@ import 'package:we_invited/utils/colors.dart';
 import 'package:we_invited/utils/internetConnectivity.dart';
 import 'package:we_invited/widgets/allWidgets.dart';
 
-class EventUserList extends StatefulWidget {
+class MyEventUserList extends StatefulWidget {
   final JoinEvent joinEvent;
-  final String myjoinId;
-  EventUserList({Key key, this.joinEvent, this.myjoinId}) : super(key: key);
+  final String status;
+    final String senderUid;
+
+  MyEventUserList({Key key, this.joinEvent, this.status, this.senderUid}) : super(key: key);
 
   @override
-  _EventUserListState createState() => _EventUserListState(joinEvent);
+  _MyEventUserListState createState() => _MyEventUserListState(joinEvent);
 }
 
-class _EventUserListState extends State<EventUserList> {
+class _MyEventUserListState extends State<MyEventUserList> {
   final JoinEvent joinEvent;
-  var myuid, joinid, myjoinid;
+  var myuid;
 
   bool visibilitybutt = false;
   ThemeData themeData;
-
-  var chreckstatus;
+var      statuscheck ;
+  var chreckstatus,joinid;
   var chrecktype;
+  var myjoinid;
+bool ischeck ;
+  _MyEventUserListState(this.joinEvent);
+  getstatus(JoinEvent joinEvent)async {
+    print("getstatus");
+    final uEmail = await AuthService().getCurrentEmail();
+    final uid = await AuthService().getCurrentUID();
+    print('getstatusuid${joinEvent.receiverUidjoin}');
 
-  _EventUserListState(this.joinEvent);
+     print("getinterest");
+      FirebaseFirestore.instance
+        .collection("JoinEvent")
+        .doc(joinEvent.receiverUidjoin)
+        .collection("JoinEventList")
+       .where('joinid', isEqualTo: joinEvent.joinid)
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((value) {
+         statuscheck = value.get('status');
+                                      statuscheck == "request"?print("จริง"):print("ไม่จริง");
+                                      setState(() {
+                                        if(statuscheck == "request"){
+                                          ischeck=false;
 
- 
+                                        }
+                                        if(statuscheck == "accept"){
+                                          ischeck=true;
 
- 
+                                        }
+                                        print('ischeck$ischeck');
+                                      });
 
-  updateMyStateaccept(JoinEvent joinEvent) async {
-    print("updateMyStateaccept");
-    print(myuid);
+       print('statuscheck$statuscheck');
 
-    final CollectionReference profileRef1 = FirebaseFirestore.instance
-        .collection('MyJoinEvent')
-        .doc(joinEvent.senderUid)
-        .collection('JoinEventList');
-        // .where('postid', isEqualTo: joinEvent.postid);
-
-    await profileRef1.doc(widget.myjoinId).update(
-      {'status': 'accept'},
-    ).then((result) {
-      setState(() {
-        visibilitybutt = true;
       });
-
-      print("Stateupdate successfully");
-      print(visibilitybutt.toString());
     }).catchError((onError) {
-      print("onError");
+      print(onError);
     });
   }
-
   @override
   void initState() {
+                    getstatus(joinEvent);
+
     checkInternetConnectivity().then((value) => {
           value == true
               ? () {
-
-                  print('widget.myjoinId${widget.myjoinId}');
+                
                   UserDataProfileNotifier profileNotifier =
                       Provider.of<UserDataProfileNotifier>(context,
                           listen: false);
                   getProfile(profileNotifier);
 
                   visibilitybutt = false;
+                  print('senderUid${widget.senderUid}');
 
                   final FirebaseAuth auth = FirebaseAuth.instance;
                   final User user = auth.currentUser;
                   final uid = user.uid.toString();
                   myuid = uid;
-                  print('myuid$myuid');
 
                   chreckstatus = joinEvent.status;
                   chrecktype = joinEvent.type;
                   joinid = joinEvent.joinid;
-                  print('myjoinid$myjoinid');
+                  getjoinid(joinEvent);
+                  print('widget.status${widget.status}');
                 }()
               : showNoInternetSnack(_scaffoldKey)
         });
@@ -108,9 +120,8 @@ class _EventUserListState extends State<EventUserList> {
     chrecktype = joinEvent.type;
 
     print(chreckstatus);
-    print(chrecktype);
     print('=>>>>>>>>>>>>>>>>>>>>>>$myuid');
-    print('senderUid=>>>>>>>>>>>>>>>>>>${joinEvent.senderUid}');
+    print('joinid=>>>>>>>>>>>>>>>>>>${joinEvent.joinid}');
 
     chrecktype == 'sent' ? print("มีค่าsent") : print("ไม่เจอ");
 
@@ -136,7 +147,7 @@ class _EventUserListState extends State<EventUserList> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                       child: CachedNetworkImage(
-                        imageUrl: joinEvent.senderAvatar,
+                        imageUrl: joinEvent.imageUrl,
                         placeholder: (context, url) =>
                             progressIndicator(MColors.primaryPurple),
                         errorWidget: (context, url, error) => Icon(Icons.error),
@@ -152,84 +163,48 @@ class _EventUserListState extends State<EventUserList> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("ชื่อผู้ส่งคำขอ"),
+                          Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                            children: [
+                                                        Text("หัวข้อที่ส่งคำขอ"),
+
+                                      SizedBox(width: 7,) ,                                                                         Text("สถานะ"),
+                            ],
+                          ),
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                joinEvent.senderName,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
-                              ),
 
-                              InkWell(
-                                  onTap: () async {
-                              await      updateStateaccept(joinEvent);
-                               await      updateMyStateaccept(joinEvent);
-                                  },
-                                  child: Container(
+                              Text(
+                                joinEvent.title,
+                                style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
+                              ),
+                             ischeck == false
+                                  ? new Container(
                                     padding: EdgeInsets.all(6),
                                     child: Text(
-                                      'accept',
+                                      'wait...',
                                       style: AppTheme.getTextStyle(
                                           themeData.textTheme.bodyText2,
                                           fontSize: 13,
                                           color: themeData.colorScheme.primary,
                                           fontWeight: 600),
                                     ),
-                                  )),
-                              InkWell(
-                                onTap: () {
-                                  retractrequest();
-                                  retractMyrequest(joinEvent);
-                                  print("กด");
-                                  // showDialog(
-                                  //     context: context,
-                                  //     builder: (BuildContext context) =>
-                                  //         EventTicketDialog());
-                                },
-                                child: Container(
+                                  )
+                                  :  new Container(
                                     padding: EdgeInsets.all(6),
-                                    child: Text("decline")),
-                              ),
-                              // visibilitybutt == false && chreckstatus == 'request'
-                              //     ? new InkWell(
-                              //     onTap: () async {
-                              //        updateStateaccept(joinEvent);
-                              //       // updateMyStateaccept(joinEvent);
-                              //       // visibilitybutt ? null : _changed(false, joinEvent);
-                              //       print("กด");
-                              //       // showDialog(
-                              //       //     context: context,
-                              //       //     builder: (BuildContext context) =>
-                              //       //         EventTicketDialog());
-                              //     },
-                              //     child: Container(
-                              //       padding: EdgeInsets.all(6),
-                              //       child: Text(
-                              //         'accept',
-                              //         style: AppTheme.getTextStyle(
-                              //             themeData.textTheme.bodyText2,
-                              //             fontSize: 13,
-                              //             color: themeData.colorScheme.primary,
-                              //             fontWeight: 600),
-                              //       ),
-                              //     ))
-                              //     : InkWell(
-                              //   onTap: () {
-                              //     retractrequest();
-                              //     retractMyrequest(joinEvent);
-                              //     print("กด");
-                              //     // showDialog(
-                              //     //     context: context,
-                              //     //     builder: (BuildContext context) =>
-                              //     //         EventTicketDialog());
-                              //   },
-                              //   child: Container(
-                              //       padding: EdgeInsets.all(6),
-                              //       child: Text("decline")),
-                              // ),
+                                    child: Text(
+                                      'Ac',
+                                      style: AppTheme.getTextStyle(
+                                          themeData.textTheme.bodyText2,
+                                          fontSize: 13,
+                                          color: themeData.colorScheme.primary,
+                                          fontWeight: 600),
+                                    ),
+                                  ),
+                                 
                             ],
                           ),
                           Container(
@@ -241,12 +216,12 @@ class _EventUserListState extends State<EventUserList> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'หัวข้อ:${joinEvent.title}',
+                                      'หัวข้อเรื่อง:${joinEvent.title}',
                                       style: TextStyle(
-                                          letterSpacing: 0,
-                                          fontSize: 12,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
+                                        letterSpacing: 0,
+                                        fontSize: 12,
+                                        color: Colors.black,fontWeight: FontWeight.bold
+                                      ),
                                     ),
                                     // Container(
                                     //   margin: EdgeInsets.only(top: 2),
@@ -299,13 +274,67 @@ class _EventUserListState extends State<EventUserList> {
     );
   }
 
+  Future getjoinid(JoinEvent joinEvent) async {
+    print("getjoinid");
+    final uEmail = await AuthService().getCurrentEmail();
+ 
+    /*ดึงค่าไลท์จากcollection/Posts/likes */
+    FirebaseFirestore.instance
+        .collection("MyJoinEvent")
+        .doc(joinEvent.senderUid)
+        .collection("JoinEventList")
+        .where('joinid')
+        .get()
+        .then((querySnapshot) {
+      //print(querySnapshot);
+      // int totallike;
+      // print('totallike$totallike');
+
+      querySnapshot.docs.forEach((value) {
+              joinid = value.get('likes');
+
+        // print('testlike=>>>>>>${value.get('likes')}');
+      });
+    }).catchError((onError) {
+      print("getCloudFirestoreUsers: ERROR");
+      print(onError);
+    });
+  }
 
   updateStateaccept(JoinEvent joinEvent) async {
     print("updateState");
     print(myuid);
+    final db = FirebaseFirestore.instance;
+    final uEmail = await AuthService().getCurrentEmail();
 
-    CollectionReference profileRef = FirebaseFirestore.instance
+    CollectionReference profileRef = await FirebaseFirestore.instance
         .collection('JoinEvent')
+        .doc(myuid)
+        .collection('JoinEventList');
+
+    await profileRef.doc(myjoinid).update(
+      {'status': 'accept'},
+    ).then((result) {
+      setState(() {
+        // _changed(false,joinEvent);
+
+        visibilitybutt = true;
+      });
+
+      print("Stateupdate successfully");
+      print(visibilitybutt.toString());
+    }).catchError((onError) {
+      print("onError");
+    });
+  }
+  updateMyStateaccept(JoinEvent joinEvent) async {
+    print("updateState");
+    print(myuid);
+    final db = FirebaseFirestore.instance;
+    final uEmail = await AuthService().getCurrentEmail();
+
+    CollectionReference profileRef = await FirebaseFirestore.instance
+        .collection('MyJoinEvent')
         .doc(myuid)
         .collection('JoinEventList');
 
@@ -356,51 +385,5 @@ class _EventUserListState extends State<EventUserList> {
                 });
               })
             });
-    await FirebaseFirestore.instance
-        .collection('MyJoinEvent')
-        .doc(myuid)
-        .collection('JoinEventList')
-        .where('receiverUidjoin', isEqualTo: myuid)
-        .where('joinid', isEqualTo: joinid)
-        .get()
-        .then((QuerySnapshot querySnapshot) => {
-              querySnapshot.docs.forEach((doc) {
-                if (doc.exists) {
-                  doc.reference.delete();
-                }
-                setState(() {
-                  visibilitybutt = false;
-                  print(visibilitybutt.toString());
-                });
-              })
-            });
-  }
-
-  retractMyrequest(JoinEvent joinEvent) async {
-    final db = FirebaseFirestore.instance;
-    final uEmail = await AuthService().getCurrentEmail();
-
-    print('retracted');
-
-    await FirebaseFirestore.instance
-        .collection('MyJoinEvent')
-        .doc('GUxduhm8ElOICQlQ9XG1rF3vtpg1')
-        .collection('JoinEventList')
-        .where('postid', isEqualTo: "jWbbqc9zX3EnZsBshosd")
-        .get()
-        .then((QuerySnapshot querySnapshot) => {
-              querySnapshot.docs.forEach((doc) {
-                if (doc.exists) {
-                  doc.reference.delete();
-                }
-                setState(() {
-                  visibilitybutt = false;
-                  print(visibilitybutt.toString());
-                });
-              })
-            })
-        .catchError((onError) {
-      print("onError");
-    });
   }
 }

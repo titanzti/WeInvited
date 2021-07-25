@@ -10,6 +10,8 @@ import 'package:we_invited/notifier/postRecom_notifier.dart';
 import 'package:we_invited/notifier/postRecom1_notifier.dart';
 
 import 'package:we_invited/notifier/postRecom2_notifier.dart';
+import 'package:we_invited/notifier/myjoin_notifier.dart';
+
 
 import 'package:we_invited/notifier/userData_notifier.dart';
 import 'package:we_invited/screens/auth/analytics_service.dart';
@@ -81,7 +83,7 @@ class _HomeControllerState extends State<HomeController> {
         stream: auth.onAuthStateChanged,
         builder: (context, AsyncSnapshot<String> snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
-            final bool signedIn = snapshot.hasData;
+            final bool  signedIn = snapshot.hasData;
             return MaterialApp(
               title: "We Invited",
               theme: ThemeData(),
@@ -116,22 +118,26 @@ class _HomeControllerState extends State<HomeController> {
                           create: (context) => PostRrcomNotifier(),
                           // value: PostNotifier(),
                         ),
-                       ChangeNotifierProvider(
+                        ChangeNotifierProvider(
                           create: (context) => PostRrcomNotifier1(),
                           // value: PostNotifier(),
                         ),
 
-                         ChangeNotifierProvider(
+                        ChangeNotifierProvider(
                           create: (context) => PostRrcomNotifier2(),
                           // value: PostNotifier(),
                         ),
- ChangeNotifierProvider(
+                        ChangeNotifierProvider(
                           create: (context) => PostRrcomNotifier3(),
                           // value: PostNotifier(),
                         ),
 
-ChangeNotifierProvider(
+                        ChangeNotifierProvider(
                           create: (context) => PostRrcomNotifier4(),
+                          // value: PostNotifier(),
+                        ),
+                         ChangeNotifierProvider(
+                          create: (context) => MyJoinNotifier(),
                           // value: PostNotifier(),
                         ),
                         // ChangeNotifierProvider(

@@ -16,6 +16,7 @@ class JoinEvent{
   Timestamp createdAt;
   String title;
   String receiveremail;
+  String imageUrl;
 
 
 
@@ -44,6 +45,7 @@ class JoinEvent{
     type = data["type"] ?? '';
     title = data["title"] ?? '';
     receiveremail = data["receiveremail"] ?? '';
+    imageUrl = data["imageUrl"] ?? '';
 
   }
 
@@ -64,6 +66,7 @@ class JoinEvent{
       'type' :type,
       'title' :title,
       'receiveremail' :receiveremail,
+      'imageUrl' :imageUrl,
 
     };
   }

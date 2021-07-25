@@ -182,6 +182,11 @@ class _RegisterState extends State<Register> {
   // }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // print(birthDate);
     // print(age);
@@ -594,7 +599,6 @@ class _RegisterState extends State<Register> {
 
   void _submit() async {
     final form = formKey.currentState;
-
     try {
       final auth = MyProvider.of(context).auth;
 
@@ -615,12 +619,16 @@ class _RegisterState extends State<Register> {
         /* เก็บข้อมูลที่สมัครขึ้นไปบนไฟเบส*/
         storeNewUser(name, _phone, _email, _gender, age.toString(), birthDate);
         print("Signed Up with new $uid");
-        /* Navigator ไปหน้าInterestScreen*/
-        Navigator.pushAndRemoveUntil(
+        Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => InterestScreen()),
-            (Route<dynamic> route) => false);
+            new MaterialPageRoute(
+                builder: (BuildContext context) => new InterestScreen()));
+        /* Navigator ไปหน้าInterestScreen*/
+        // Navigator.pushAndRemoveUntil(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (BuildContext context) => InterestScreen()),
+        //     (Route<dynamic> route) => false);
       } else {
         setState(() {
           _autoValidate = true;

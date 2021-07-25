@@ -54,8 +54,10 @@ class _CategoryCardState extends State<CategoryCard> {
               ? () {
                   PostNotifier postsNotifier =
                       Provider.of<PostNotifier>(context, listen: false);
-                  getPostswithcategory(postsNotifier, _title);
+                  getPostswithcategory(postsNotifier, widget._title);
                   print('เชื่อมต่อ');
+                  print('widget._title${widget._title}');
+                  print('_title$_title');
 
                   UserDataProfileNotifier profileNotifier =
                       Provider.of<UserDataProfileNotifier>(context,
@@ -124,7 +126,7 @@ class _CategoryCardState extends State<CategoryCard> {
                 builder: (BuildContext context) => ChangeNotifierProvider(
                   create: (context) => PostNotifier(),
                   builder: (context, child) =>
-                      DetailScreen(_title, _imageUrl, joinEvent, user),
+                      DetailScreen(widget._title, _imageUrl, joinEvent, user),
                 ),
               ),
             );

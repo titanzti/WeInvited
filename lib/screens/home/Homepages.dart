@@ -120,7 +120,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
     return Color(int.parse('FF$hexCode', radix: 16));
   }
 
-  testListinterest() async {
+  getListinterest() async {
     print('testListinterest');
     final uEmail = await AuthService().getCurrentEmail();
 
@@ -132,26 +132,20 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
         .then((querySnapshot) {
       querySnapshot.docs.forEach((element) {
         value = element.data()["Listinterest"];
-        print(value);
+        // print(value);
 
         interest1 = value[0];
         interest2 = value[1];
         interest3 = value[2];
         interest4 = value[3];
         interest5 = value[4];
-//          print('test1==>>$interest1');
+         print('interest1==>>$interest1');
+         print('interest2==>>$interest2');
+         print('interest3==>>$interest3');
+         print('interest4==>>$interest4');
+         print('interest5==>>$interest5');
 
-//         print('value=>>>$value');
-//         print('Listinterest1${value[0]}');
-//                 print('Listinterest1${value[1]}');
-//  print('Listinterest1${value[2]}');
 
-//   print('Listinterest1${value[3]}');
-//    print('Listinterest1${value[4]}');
-
-        // FirebaseFirestore.instance.collection("items").doc(value[0]).get().then((value){
-        //   print(value.data);
-        // });
       });
     });
   }
@@ -280,20 +274,6 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                   BannerAdNotifier bannerAdNotifier =
                       Provider.of<BannerAdNotifier>(context, listen: false);
                   getBannerAdsFuture = getBannerAds(bannerAdNotifier);
-
-                  // resultsLoaded = getUsersPastTripsStreamSnapshots();
-
-                  // ProductsNotifier productsNotifier =
-                  // Provider.of<ProductsNotifier>(context, listen: false);
-                  // getProdProducts(productsNotifier);
-                  //
-                  // CartNotifier cartNotifier =
-                  // Provider.of<CartNotifier>(context, listen: false);
-                  // getCart(cartNotifier);
-                  //
-                  // BannerAdNotifier bannerAdNotifier =
-                  // Provider.of<BannerAdNotifier>(context, listen: false);
-                  // getBannerAds(bannerAdNotifier);
                 }()
               : showNoInternetSnack(_scaffoldKey)
         });
@@ -456,7 +436,8 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     print("buildHome");
-    testListinterest();
+    
+    getListinterest();
 
     _height = MediaQuery.of(context).size.height;
     _width = MediaQuery.of(context).size.width;
@@ -467,6 +448,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
     final PostRrcomNotifier postsrecomNotifier =
         Provider.of<PostRrcomNotifier>(context);
     var postsrecom = postsrecomNotifier.postrecomList;
+    print('postsrecom${postsrecom.length}');
 
     final PostRrcomNotifier1 postsrecom1Notifier =
         Provider.of<PostRrcomNotifier1>(context);
@@ -553,21 +535,13 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                     getProfile(profileNotifier);
                   });
                 }
-
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(builder: (BuildContext context) {
-                //     return PostActivity(
-                //       isUpdating: false,
-                //     );
-                //   }),
-                // );
               },
               child: Icon(Icons.add),
               backgroundColor: Colors.purple[900],
               foregroundColor: Colors.white,
             ),
             key: _scaffoldKey,
-            backgroundColor: color2,
+            backgroundColor: Colors.white,
             body: RefreshIndicator(
               onRefresh: () => () async {
                 await getPosts(postsNotifier);
@@ -607,12 +581,12 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                                 Container(
                                   child: Text(
                                     "We Invited",
-                                    style: AppTheme.getTextStyle(
-                                        themeData.textTheme.headline5,
-                                        fontSize: 24,
-                                        fontWeight: 700,
-                                        letterSpacing: -0.3,
-                                        color: Colors.black),
+                                    style: TextStyle(
+                                      fontFamily: 'Wandertucker',
+                                      letterSpacing: -0.3,
+                                      color: Colors.black,
+                                      fontSize: 48,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -620,72 +594,18 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                           ),
                           Stack(
                             children: [
-                              // Container(
-                              //   padding: const EdgeInsets.all(10.0),
-                              //   decoration: BoxDecoration(
-                              //     borderRadius:
-                              //         BorderRadius.all(Radius.circular(8)),
-                              //   ),
-                              //   child: InkWell(
-                              //     onTap: () async {
-                              //       print('ปุ่มกด');
-                              //       // signOutGoogle(_token);
-                              //       HapticFeedback.mediumImpact();
-                              //       // postsNotifier.currentPost = null;
-                              //       // UserDataProfileNotifier profileNotifier =
-                              //       //     Provider.of<UserDataProfileNotifier>(
-                              //       //         context,
-                              //       //         listen: false);
-                              //       // PostNotifier postsNotifier =
-                              //       //     Provider.of<PostNotifier>(context,
-                              //       //         listen: false);
-                              //       // var navigationResult =
-                              //       //     await
-                              //       // if (navigationResult == true) {
-                              //       //   setState(() {
-                              //       //     getProfile(profileNotifier);
-                              //       //     getPosts(postsNotifier);
-                              //       //     getEvenReqPosts(joinNotifier);
-                              //       //   });
-                              //       // }
-                              //       Navigator.of(context).push(
-                              //         CupertinoPageRoute(
-                              //           builder: (BuildContext context) =>
-                              //               ChangeNotifierProvider<
-                              //                   JoinNotifier>(
-                              //             create: (context) => JoinNotifier(),
-                              //             builder: (context, child) =>
-                              //                 NotificationPage(),
-                              //           ),
-                              //         ),
-                              //       );
-                              //     },
-                              //     child: Icon(
-                              //       MdiIcons.bell,
-                              //       size: 18,
-                              //       color: Colors.grey,
-                              //     ),
-                              //   ),
-                              // ),
-
-                              // Container(
-                              //   padding: const EdgeInsets.all(10.0),
-                              //   decoration: BoxDecoration(
-                              //     borderRadius:
-                              //         BorderRadius.all(Radius.circular(8)),
-                              //   ),
-                              //   child: InkWell(
-                              //     onTap: () async {
-                              //       bottom_sheet(context, formValue);
-                              //     },
-                              //     child: Icon(
-                              //       MdiIcons.settingsHelper,
-                              //       size: 18,
-                              //       color: Colors.grey,
-                              //     ),
-                              //   ),
-                              // ),
                               Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(16.0)),
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.6),
+                                      offset: const Offset(4, 4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
                                 margin: const EdgeInsets.only(left: 16.0),
                                 child: ClipRRect(
                                   borderRadius:
@@ -704,33 +624,26 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                               )
                             ],
                           ),
-                          // Container(
-                          //   margin: const EdgeInsets.only(left: 16.0),
-                          //   child: ClipRRect(
-                          //     borderRadius: BorderRadius.all(Radius.circular(16)),
-                          //     child: user.profilePhoto != null
-                          //         ? FadeInImage.assetNetwork(
-                          //             image: user.profilePhoto,
-                          //             fit: BoxFit.fill,
-                          //             height: 36,
-                          //             width: 36,
-                          //             placeholder: "assets/profile1.png",
-                          //           )
-                          //         : FadeInImage.assetNetwork(
-                          //             image: 'assets/profile1.png',
-                          //             fit: BoxFit.fill,
-                          //             height: 36,
-                          //             width: 36,
-                          //             placeholder: "assets/profile1.png",
-                          //           ),
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
                     /////////////////////////
+                    SizedBox(
+                      height: 10,
+                    ),
 
                     Container(
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(16.0)),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.6),
+                            offset: const Offset(4, 4),
+                            blurRadius: 16,
+                          ),
+                        ],
+                      ),
                       child: CarouselSlider(
                         options: CarouselOptions(
                           height: 170.0,
@@ -799,7 +712,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                     ),
 
                     Container(
-                      margin: EdgeInsets.only(left: 30, right: 30, top: 10),
+                      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -819,43 +732,47 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                     // expandList(),
                     Divider(),
                     SizedBox(
-                      height: 10,
+                      height: 5,
                     ),
                     // Divider(),
 
                     Container(
                       margin: EdgeInsets.only(
-                          left: 20, top: 4, right: 10, bottom: 0),
+                          left: 20, top: 1, right: 10, bottom: 0),
                       child: Row(
                         children: [
                           Divider(),
                           Expanded(
                             child: Text(
                               "Popular",
-                              style: AppTheme.getTextStyle(
-                                  themeData.textTheme.subtitle1,
-                                  fontWeight: 700,
-                                  color: Colors.black),
+                              style: TextStyle(
+                                // fontFamily: 'Wandertucker',
+                                // letterSpacing: -0.3,
+                                color: Colors.black,
+                                fontSize: 18,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    SizedBox(
-                      height: 10,
-                    ),
+                    // SizedBox(
+                    //   height: 5,
+                    // ),
 
                     _searchController.text == ""
                         ? Container(
                             padding: const EdgeInsets.only(
-                                left: 10, right: 10, top: 8, bottom: 16),
+                                left: 10, right: 10, top: 1, bottom: 1),
+                            // margin: EdgeInsets.symmetric(
+                            //     horizontal: 10, vertical: 1),
                             margin: EdgeInsets.only(
-                                left: 10, top: 4, right: 18, bottom: 0),
+                                left: 0, top: 4, right: 0, bottom: 0),
                             child: SizedBox(
                               //ขนาดPopular
-                              height: 300.0,
-                              // width: 800.0,
+                              height: 250.0,
+                              width: double.infinity,
                               child: ListView.builder(
                                 physics: ClampingScrollPhysics(),
                                 shrinkWrap: true,
@@ -910,214 +827,211 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                                               Radius.circular(12))),
                                       width: 250,
                                       // height: 200,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            child: Stack(
-                                              overflow: Overflow.visible,
-                                              children: [
-                                                AspectRatio(
-                                                  aspectRatio: 2,
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topLeft: Radius
-                                                                .circular(8),
-                                                            topRight:
-                                                                Radius.circular(
-                                                                    8)),
-                                                    child: CachedNetworkImage(
-                                                      imageUrl:
-                                                          posts[index].image,
-                                                      placeholder: (context,
-                                                              url) =>
-                                                          progressIndicator(
-                                                              MColors
-                                                                  .primaryPurple),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          Icon(Icons.error),
-                                                      fit: BoxFit.cover,
+                                      child: Container(
+                                        // margin: EdgeInsets.symmetric(
+                                        //     horizontal: 20, vertical: 18),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              child: Stack(
+                                                overflow: Overflow.visible,
+                                                children: [
+                                                  AspectRatio(
+                                                    aspectRatio: 2,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                              topLeft: Radius
+                                                                  .circular(8),
+                                                              topRight: Radius
+                                                                  .circular(8)),
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            posts[index].image,
+                                                        placeholder: (context,
+                                                                url) =>
+                                                            progressIndicator(
+                                                                MColors
+                                                                    .primaryPurple),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Icon(Icons.error),
+                                                        fit: BoxFit.cover,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                Positioned(
-                                                  bottom: -16,
-                                                  left: 16,
-                                                  child: Container(
-                                                    padding: EdgeInsets.only(
-                                                        left: 8,
-                                                        top: 4,
-                                                        right: 8,
-                                                        bottom: 4),
-                                                    decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xffffffff),
-                                                        border: Border.all(
-                                                            color: Color(
-                                                                0xffeef2fa),
-                                                            width: 0.5),
-                                                        boxShadow: [
-                                                          BoxShadow(
+                                                  Positioned(
+                                                    bottom: -16,
+                                                    left: 16,
+                                                    child: Container(
+                                                      padding: EdgeInsets.only(
+                                                          left: 8,
+                                                          top: 4,
+                                                          right: 8,
+                                                          bottom: 4),
+                                                      decoration: BoxDecoration(
+                                                          color:
+                                                              Color(0xffffffff),
+                                                          border: Border.all(
                                                               color: Color(
-                                                                      0xff1f1f1f)
-                                                                  .withAlpha(
-                                                                      150),
-                                                              blurRadius: 1,
-                                                              offset:
-                                                                  Offset(0, 1))
-                                                        ],
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    8))),
-                                                    child: Column(
-                                                      children: [
-                                                        Text(
-                                                          '${format.format(posts[index].startdateTime.toDate())}',
-                                                          style: AppTheme
-                                                              .getTextStyle(
-                                                                  themeData
-                                                                      .textTheme
-                                                                      .bodyText2,
-                                                                  color: themeData
-                                                                      .colorScheme
-                                                                      .primary,
-                                                                  fontWeight:
-                                                                      600),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                        Text(
-                                                          '${format1.format(posts[index].startdateTime.toDate())}',
-                                                          style: AppTheme
-                                                              .getTextStyle(
-                                                                  themeData
-                                                                      .textTheme
-                                                                      .bodyText2,
-                                                                  fontSize: 11,
-                                                                  color: themeData
-                                                                      .colorScheme
-                                                                      .primary,
-                                                                  fontWeight:
-                                                                      600),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.only(
-                                                left: 16,
-                                                top: 24,
-                                                right: 16,
-                                                bottom: 16),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Text(posts[index].name,
-                                                        style: titleStyle),
-                                                    UIHelper.verticalSpace(4),
-                                                    Row(
-                                                      children: <Widget>[
-                                                        Icon(Icons.location_on,
-                                                            size: 16,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColor),
-                                                        UIHelper
-                                                            .horizontalSpace(4),
-                                                        // ExpandableText(
-                                                        //   posts[index].place,
-                                                        //   style: subtitleStyle,
-                                                        //   expandText: 'show more',
-                                                        //   collapseText: 'show less',
-                                                        //   maxLines: 1,
-                                                        //   linkColor: Colors.blue,
-                                                        //   onExpandedChanged:
-                                                        //       (value) => print(value),
-                                                        // ),
-                                                      ],
-                                                    ),
-                                                    Text(
-                                                      posts[index].place,
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Container(
-                                                  margin:
-                                                      EdgeInsets.only(top: 8),
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            // Text(
-                                                            //   subject,
-                                                            //   style: AppTheme.getTextStyle(
-                                                            //       themeData.textTheme.caption,
-                                                            //       fontSize: 12,
-                                                            //       color: themeData.colorScheme.onBackground,
-                                                            //       fontWeight: 500,
-                                                            //       xMuted: true),
-                                                            // ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 2),
-                                                              child: Text(
-                                                                '${format2.format(posts[index].startdateTime.toDate())} -${format3.format(posts[index].entdateTime.toDate())} ',
-                                                                style: AppTheme.getTextStyle(
-                                                                    themeData
-                                                                        .textTheme
-                                                                        .caption,
-                                                                    fontSize:
-                                                                        14,
-                                                                    color: Colors
-                                                                        .black,
-                                                                    fontWeight:
-                                                                        500,
-                                                                    xMuted:
-                                                                        true),
-                                                              ),
-                                                            ),
+                                                                  0xffeef2fa),
+                                                              width: 0.5),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                                color: Color(
+                                                                        0xff1f1f1f)
+                                                                    .withAlpha(
+                                                                        150),
+                                                                blurRadius: 1,
+                                                                offset: Offset(
+                                                                    0, 1))
                                                           ],
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          8))),
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                            '${format.format(posts[index].startdateTime.toDate())}',
+                                                            style: AppTheme.getTextStyle(
+                                                                themeData
+                                                                    .textTheme
+                                                                    .bodyText2,
+                                                                color: themeData
+                                                                    .colorScheme
+                                                                    .primary,
+                                                                fontWeight:
+                                                                    600),
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                          ),
+                                                          Text(
+                                                            '${format1.format(posts[index].startdateTime.toDate())}',
+                                                            style: AppTheme.getTextStyle(
+                                                                themeData
+                                                                    .textTheme
+                                                                    .bodyText2,
+                                                                fontSize: 11,
+                                                                color: themeData
+                                                                    .colorScheme
+                                                                    .primary,
+                                                                fontWeight:
+                                                                    600),
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  left: 16,
+                                                  top: 24,
+                                                  right: 16,
+                                                  bottom: 16),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: <Widget>[
+                                                      Text(posts[index].name,
+                                                          style: titleStyle),
+                                                      UIHelper.verticalSpace(4),
+                                                      Row(
+                                                        children: <Widget>[
+                                                          // ExpandableText(
+                                                          //   posts[index].place,
+                                                          //   style: subtitleStyle,
+                                                          //   expandText: 'show more',
+                                                          //   collapseText: 'show less',
+                                                          //   maxLines: 1,
+                                                          //   linkColor: Colors.blue,
+                                                          //   onExpandedChanged:
+                                                          //       (value) => print(value),
+                                                          // ),
+                                                        ],
+                                                      ),
+                                                      Text(
+                                                        posts[index].place,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
                                                         ),
                                                       ),
-                                                      // Container(
-                                                      //   child: Icon(
-                                                      //     MdiIcons.heartOutline,
-                                                      //     color: themeData
-                                                      //         .colorScheme.primary,
-                                                      //   ),
-                                                      // )
                                                     ],
                                                   ),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        ],
+                                                  Container(
+                                                    margin:
+                                                        EdgeInsets.only(top: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              // Text(
+                                                              //   subject,
+                                                              //   style: AppTheme.getTextStyle(
+                                                              //       themeData.textTheme.caption,
+                                                              //       fontSize: 12,
+                                                              //       color: themeData.colorScheme.onBackground,
+                                                              //       fontWeight: 500,
+                                                              //       xMuted: true),
+                                                              // ),
+                                                              Container(
+                                                                margin: EdgeInsets
+                                                                    .only(
+                                                                        top: 2),
+                                                                child: Text(
+                                                                  '${format2.format(posts[index].startdateTime.toDate())} -${format3.format(posts[index].entdateTime.toDate())} ',
+                                                                  style: AppTheme.getTextStyle(
+                                                                      themeData
+                                                                          .textTheme
+                                                                          .caption,
+                                                                      fontSize:
+                                                                          14,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontWeight:
+                                                                          500,
+                                                                      xMuted:
+                                                                          true),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        // Container(
+                                                        //   child: Icon(
+                                                        //     MdiIcons.heartOutline,
+                                                        //     color: themeData
+                                                        //         .colorScheme.primary,
+                                                        //   ),
+                                                        // )
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1127,6 +1041,8 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                           )
                         : Container(),
                     ///////////////////ค้นหา
+    
+               postsrecom.length!=0?  Text('แนะนำ$interest1',style: TextStyle(fontSize: 18),):Container(),
                     _searchController.text == ""
                         ? Builder(
                             builder: (BuildContext context) {
@@ -1146,6 +1062,8 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                             },
                           )
                         : Container(),
+                   postsrecom1.length!=0?  Text('แนะนำ$interest2',style: TextStyle(fontSize: 18),):Container(),
+
                     _searchController.text == ""
                         ? Builder(
                             builder: (BuildContext context) {
@@ -1164,6 +1082,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                             },
                           )
                         : Container(),
+               postsrecom2.length!=0?  Text('แนะนำ$interest3',style: TextStyle(fontSize: 18),):Container(),
 
                     _searchController.text == ""
                         ? Builder(
@@ -1183,6 +1102,8 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                             },
                           )
                         : Container(),
+                 postsrecom3.length!=0?  Text('แนะนำ$interest4',style: TextStyle(fontSize: 18),):Container(),
+
                     _searchController.text == ""
                         ? Builder(
                             builder: (BuildContext context) {
@@ -1201,6 +1122,7 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                             },
                           )
                         : Container(),
+               postsrecom4.length!=0?  Text('แนะนำ$interest5',style: TextStyle(fontSize: 18),):Container(),
                     _searchController.text == ""
                         ? Builder(
                             builder: (BuildContext context) {
@@ -1211,6 +1133,8 @@ class _HomeState extends State<HomeFeed> with TickerProviderStateMixin {
                                 scrollDirection: Axis.vertical,
                                 shrinkWrap: true,
                                 itemBuilder: (BuildContext context, int index) {
+                                                          print(postsrecom4.length);
+
                                   return PostListRecom4View(
                                     postsrecom4: postsrecom4[index],
                                   );

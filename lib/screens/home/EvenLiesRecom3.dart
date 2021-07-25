@@ -392,16 +392,16 @@ class _PostListRecom3ViewState extends State<PostListRecom3View> {
           }
         },
         child: Container(
-          // decoration: BoxDecoration(
-          //   borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-          //   boxShadow: <BoxShadow>[
-          //     BoxShadow(
-          //       color: Colors.grey.withOpacity(0.6),
-          //       offset: const Offset(4, 4),
-          //       blurRadius: 16,
-          //     ),
-          //   ],
-          // ),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.6),
+                offset: const Offset(4, 4),
+                blurRadius: 16,
+              ),
+            ],
+          ),
           child: ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(16.0)),
             child: Stack(

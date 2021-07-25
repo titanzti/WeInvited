@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
@@ -14,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:we_invited/main.dart';
+import 'package:we_invited/models/Comment.dart';
 import 'package:we_invited/models/joinevent.dart';
 import 'package:we_invited/models/post.dart';
 import 'package:we_invited/models/postrecom.dart';
@@ -104,6 +106,67 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
   bool isExpired;
   String _token = "token";
   DateTime dateexp = DateTime.now();
+
+  var autoId;
+  var mesgController = new TextEditingController();
+  Future getDataFuture;
+  String mesg;
+  List<Comment> _commentList = [];
+
+  static const AUTO_ID_ALPHABET =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  static const AUTO_ID_LENGTH = 20;
+  String _getAutoId() {
+    final buffer = StringBuffer();
+    final random = Random.secure();
+
+    final maxRandom = AUTO_ID_ALPHABET.length;
+
+    for (int i = 0; i < AUTO_ID_LENGTH; i++) {
+      buffer.write(AUTO_ID_ALPHABET[random.nextInt(maxRandom)]);
+    }
+    return buffer.toString();
+  }
+
+  sendcomment(String mesg, autoId) async {
+    print('sendcomment');
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection("Posts")
+        .doc(postDetails.category)
+        .collection("PostsList")
+        .doc(postDetails.postid)
+        .collection("Comment")
+        .doc('$autoId')
+        .set({
+      'commentid': autoId,
+      'commentbyname': widget.userData.name,
+      'createdAt': Timestamp.now(),
+      'mesg': mesg,
+      'commentbyprofilePhoto': widget.userData.profilePhoto,
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  Future fetchAndSetList() async {
+    print('fetchAndSetList');
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("Posts")
+        .doc("ALL")
+        .collection("PostsList")
+        .doc(postDetails.postid)
+        .collection("Comment")
+        .orderBy("createdAt", descending: true)
+        // .orderBy("likes", descending: true)
+        .get();
+
+    snapshot.docs.forEach((document) {
+      Comment comments = Comment.fromMap(document.data());
+      _commentList.add(comments);
+      print('_commentList${_commentList.length}');
+    });
+  }
 
 /*ฟังชั่นกดไลท์ */
   Future likepost(int totallike, String postId) async {
@@ -204,6 +267,8 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
 
   @override
   void initState() {
+    getDataFuture = fetchAndSetList();
+
     controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     bodyScrollAnimationController =
@@ -240,25 +305,6 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
                   visibilitybutt = false;
                   open = conte + 1;
 
-                  // print('mycategory=>>>$mycategory');
-                  // switch (mycategory) {
-                  //   case 'Party':
-                  //     FirebaseFirestore.instance
-                  //         .collection("interest")
-                  //         .doc(widget.userData.email)
-                  //         .collection('like')
-                  //         .doc(widget.userData.email)
-                  //         .update({
-                  //       'Party': open + 1,
-                  //     }).catchError((e) {
-                  //       print(e);
-                  //     });
-                  //     print('Party1');
-                  //     break;
-                  //   // case PI:
-                  //   //   // do something else
-                  //   //   break;
-                  // }
                   mycategory = postDetails.category;
                   print('mycategory$mycategory');
 
@@ -295,27 +341,6 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
                   }
                   otheremail = postDetails.emailuser;
                   getlikes(mypostid);
-
-                  // checkpostidEvent= _joinEvent.requestpostid;
-                  // print(checkpostidEvent);
-                  // mypostuid==myuid?print('เจ้าของโพส'):print('ไม่ใช่เจ้าของโพส');
-                  // chrecktype=widget.joinEvent.type;
-
-                  // UserDataProfileNotifier profileNotifier = Provider.of<UserDataProfileNotifier>(context, listen: false);
-                  // getProfile(profileNotifier);
-                  // ProductsNotifier productsNotifier =
-                  // Provider.of<ProductsNotifier>(context, listen: false);
-                  // getProdProducts(productsNotifier);
-                  //
-                  // CartNotifier cartNotifier =
-                  // Provider.of<CartNotifier>(context, listen: false);
-                  // getCart(cartNotifier);
-                  //
-                  // BannerAdNotifier bannerAdNotifier =
-                  // Provider.of<BannerAdNotifier>(context, listen: false);
-                  // getBannerAds(bannerAdNotifier);
-
-                  // checkIfSentRequest();
                 }()
               : showNoInternetSnack(_scaffoldKey)
         });
@@ -548,6 +573,8 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
 
   @override
   Widget build(BuildContext context) {
+    autoId = _getAutoId();
+
     isExpired = dateexp.isBefore(postDetails.entdateTime.toDate());
     // print('isExpired$isExpired');
     mypostid = postDetails.postid;
@@ -640,11 +667,92 @@ class _PostDetailsRecomV1State extends State<PostDetailsRecomV1>
                           ),
                           UIHelper.verticalSpace(24),
                           buildEventLocation(),
-                          Divider(
-                            thickness: 1,
-                            color: Colors.grey[200],
+
+                          Text("comment"),
+                          TextFormField(
+                            controller: mesgController,
+                            decoration:
+                                InputDecoration(labelText: 'ENTER Comment'),
+                            // initialValue: _currentPost.name,
+                            keyboardType: TextInputType.text,
+                            style: TextStyle(fontSize: 15),
+                            validator: (String value) {
+                              if (value.isEmpty) {
+                                return 'Please enter a title';
+                              }
+                              return null;
+                            },
+                            onSaved: (String value) {
+                              mesg = value;
+                            },
+                            onChanged: (String value) {
+                              mesg = value;
+                              print('mesg$mesg');
+                            },
                           ),
-                          UIHelper.verticalSpace(124),
+                          //  mesgController.text=="" ? Container():
+                          checkissendrequest != true
+                              ? Container()
+                              : Align(
+                                  alignment: Alignment.topRight,
+                                  child: RaisedButton(
+                                    child: Text(
+                                      "Send",
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                    onPressed: () {
+                                      sendcomment(mesg, autoId);
+                                      setState(() {
+                                        mesgController.clear();
+                                      });
+                                      print('กด');
+                                    },
+                                    color: Colors.red,
+                                    textColor: Colors.white,
+                                    padding: EdgeInsets.all(8.0),
+                                    splashColor: Colors.grey,
+                                  ),
+                                ),
+
+                          Container(
+                            width: 300,
+                            height: 300,
+                            child: FutureBuilder(
+                              future: Future.wait([
+                                getDataFuture,
+                              ]),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
+                                return ListView.builder(
+                                  itemCount: _commentList.length,
+                                  padding: EdgeInsets.all(10),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    var datalist = _commentList[index];
+                                    return ListTile(
+                                      title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(datalist.commentbyname),
+                                        ],
+                                      ),
+                                      subtitle: Text(datalist.mesg),
+                                      leading: CircleAvatar(
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          child: Image.network(
+                                            datalist.commentbyprofilePhoto,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
                           //...List.generate(10, (index) => ListTile(title: Text("Dummy content"))).toList(),
                         ],
                       ),
