@@ -93,6 +93,8 @@ dependencies:
   geolocator: ^5.1.5
   flutter_easyloading: ^2.0.0
   random_string: ^2.1.0
+  flutter_easyrefresh: ^2.1.8
+
 
 
 

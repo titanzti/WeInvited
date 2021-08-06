@@ -75,7 +75,7 @@ class _InterestScreenState extends State<InterestScreen> {
       appBar: primaryAppBar(
         null,
         Text(
-          "Select Interest",
+          "Select Interest Event",
           textAlign: TextAlign.left,
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -99,7 +99,7 @@ class _InterestScreenState extends State<InterestScreen> {
                 addAutomaticKeepAlives: true,
                 children: <Widget>[
                   Content(
-                    title: 'Interest',
+                    title: 'Interest Category',
                     child: Form(
                       key: formKey,
                       child: Column(

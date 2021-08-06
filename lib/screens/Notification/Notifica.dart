@@ -18,6 +18,7 @@ import 'package:we_invited/utils/colors.dart';
 import 'package:we_invited/utils/internetConnectivity.dart';
 import 'package:we_invited/widgets/allWidgets.dart';
 import 'package:we_invited/notifier/myjoin_notifier.dart';
+import 'dart:async';
 
 class NotificationPage extends StatefulWidget {
   final Post postDetails;
@@ -32,6 +33,7 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   Post postDetails = Post();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  StreamController _postsController;
 
   var myuid,status,senderUid;
 
@@ -55,6 +57,8 @@ class _NotificationPageState extends State<NotificationPage> {
                 }()
               : showNoInternetSnack(_scaffoldKey)
         });
+              _postsController = new StreamController();
+
     super.initState();
   }
 
@@ -101,6 +105,8 @@ class _NotificationPageState extends State<NotificationPage> {
     snapshot.docs.forEach((document) {
       JoinEvent joinevent = JoinEvent.fromMap(document.data());
       _joinsList.add(joinevent);
+     _postsController.add(joinevent);
+
     });
 
     joinNotifier.joineventList = _joinsList;
@@ -122,6 +128,8 @@ class _NotificationPageState extends State<NotificationPage> {
     snapshot.docs.forEach((document) {
       JoinEvent joinevent = JoinEvent.fromMap(document.data());
       _joinsList.add(joinevent);
+           _postsController.add(joinevent);
+
     });
 
     joinNotifier.joineventList = _joinsList;
@@ -242,6 +250,7 @@ class _NotificationPageState extends State<NotificationPage> {
             width: double.infinity,
             height: 300,
             child: StreamBuilder(
+
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.active:
